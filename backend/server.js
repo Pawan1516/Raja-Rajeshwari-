@@ -26,9 +26,21 @@ const startServer = async () => {
   app.use('/api/team', require('./routes/teamRoutes'));
   app.use('/api/inquiries', require('./routes/inquiryRoutes'));
 
-  // Root Route
-  app.get('/', (req, res) => {
-    res.json({ message: 'Welcome to the Raja Rajeshwari Interior Works API!' });
+  // Serve Frontend Static Files in Production (Frontend is built in ../frontend/dist)
+  const distPath = path.join(__dirname, '../frontend/dist');
+  app.use(express.static(distPath));
+
+  // Catch-all Route for client-side React SPA routing
+  app.get('*', (req, res) => {
+    if (req.path.startsWith('/api')) {
+      return res.status(404).json({ message: 'API endpoint not found' });
+    }
+    const indexPath = path.join(distPath, 'index.html');
+    if (require('fs').existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      res.json({ message: 'Welcome to the Raja Rajeshwari Interior Works API! (Frontend build not found)' });
+    }
   });
 
   // Error handling middleware
