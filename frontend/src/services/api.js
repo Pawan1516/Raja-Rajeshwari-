@@ -250,8 +250,13 @@ export const authService = {
 
 export const categoryService = {
   getAll: async () => {
-    const response = await api.get('/categories');
-    return response.data;
+    try {
+      const response = await api.get('/categories');
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (e) {
+      console.error('Error fetching categories:', e);
+      return [];
+    }
   },
   create: async (formData) => {
     const response = await api.post('/categories', formData, {
@@ -277,8 +282,13 @@ export const categoryService = {
 
 export const designService = {
   getAll: async (filters = {}) => {
-    const response = await api.get('/designs', { params: filters });
-    return response.data;
+    try {
+      const response = await api.get('/designs', { params: filters });
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (e) {
+      console.error('Error fetching designs:', e);
+      return [];
+    }
   },
   getById: async (id) => {
     const response = await api.get(`/designs/${id}`);
@@ -308,8 +318,13 @@ export const designService = {
 
 export const teamService = {
   getAll: async () => {
-    const response = await api.get('/team');
-    return response.data;
+    try {
+      const response = await api.get('/team');
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (e) {
+      console.error('Error fetching team:', e);
+      return [];
+    }
   },
   create: async (formData) => {
     const response = await api.post('/team', formData, {
@@ -335,8 +350,13 @@ export const teamService = {
 
 export const inquiryService = {
   getAll: async () => {
-    const response = await api.get('/inquiries');
-    return response.data;
+    try {
+      const response = await api.get('/inquiries');
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (e) {
+      console.error('Error fetching inquiries:', e);
+      return [];
+    }
   },
   create: async (payload) => {
     const response = await api.post('/inquiries', payload);
