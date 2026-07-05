@@ -59,6 +59,10 @@ export default function DesignListing() {
       .finally(() => setLoading(false));
   }, [selectedCategory, selectedWorkType, searchQuery]);
 
+  const handleClearAllFilters = () => {
+    setSearchParams({});
+  };
+
   const handleCategoryChange = (catId) => {
     const params = new URLSearchParams(searchParams);
     catId ? params.set('category', catId) : params.delete('category');
@@ -110,9 +114,19 @@ export default function DesignListing() {
         {/* Sidebar Filters */}
         <div className="lg:col-span-1 space-y-4">
           <div className="bg-white rounded-2xl p-5 shadow-premium border border-slate-100">
-            <div className="flex items-center gap-2 mb-4 border-b border-slate-100 pb-3">
-              <Filter className="w-4 h-4 text-wood" />
-              <h2 className="font-outfit font-bold text-base text-slate-900">Categories</h2>
+            <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <Filter className="w-4 h-4 text-wood" />
+                <h2 className="font-outfit font-bold text-base text-slate-900">Categories</h2>
+              </div>
+              {(selectedCategory || selectedWorkType || searchQuery) && (
+                <button
+                  onClick={handleClearAllFilters}
+                  className="text-xs text-rose-600 hover:text-rose-800 font-bold hover:underline transition-smooth"
+                >
+                  Clear All
+                </button>
+              )}
             </div>
             <div className="space-y-2">
               {selectedCategory ? (
