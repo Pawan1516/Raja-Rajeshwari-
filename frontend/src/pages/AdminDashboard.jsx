@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, FolderPlus, Upload, X, Check, Loader, AlertTriangle, Sparkles, Phone, MessageSquare } from 'lucide-react';
 import { authService, categoryService, designService, teamService, inquiryService } from '../services/api';
+import { API_BASE_URL } from '../constants';
 import { createLuminanceDepthMap } from '../utils/depthMapGenerator';
 
 const getWhatsAppLink = (phone) => {
@@ -428,7 +429,7 @@ export default function AdminDashboard() {
   const getImageUrl = (imagePath) => {
     if (!imagePath) return 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400&q=80';
     if (imagePath.startsWith('/uploads')) {
-      return `http://localhost:5000${imagePath}`;
+      return `${API_BASE_URL}${imagePath}`;
     }
     return imagePath;
   };

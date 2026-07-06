@@ -3,7 +3,10 @@ export const PHONE_DISPLAY  = import.meta.env.VITE_PHONE_DISPLAY  ?? '+91 99897 
 export const WA_NUMBER      = import.meta.env.VITE_WHATSAPP_NUMBER ?? '919989704779';
 
 const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-export const API_URL        = import.meta.env.VITE_API_URL         ?? (isLocal ? 'http://localhost:5000/api' : 'https://raja-rajeshwari-backend.onrender.com/api');
+export const API_BASE_URL   = import.meta.env.VITE_API_URL 
+  ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '') 
+  : (isLocal ? 'http://localhost:5000' : window.location.origin);
+export const API_URL        = `${API_BASE_URL}/api`;
 
 /** Builds a WhatsApp deeplink with a pre-filled message for a design */
 export function buildWALink({ designId = '', categoryName = '', title = '', imageUrl = '' } = {}) {

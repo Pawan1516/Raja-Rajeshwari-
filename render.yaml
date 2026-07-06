@@ -1,12 +1,12 @@
 services:
-  # ── Backend Web Service ──
+  # ── Unified Fullstack Web Service ──
   - type: web
     name: raja-rajeshwari-backend
     env: node
     plan: free
-    rootDir: backend
-    buildCommand: npm install
-    startCommand: node server.js
+    # We build the backend dependencies, frontend dependencies, and compile the frontend
+    buildCommand: npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend
+    startCommand: node backend/server.js
     envVars:
       - key: MONGODB_URI
         sync: false # Enter your MongoDB connection string in Render Dashboard
@@ -14,17 +14,3 @@ services:
         generateValue: true # Render will generate a secure random JWT secret automatically
       - key: PORT
         value: 5000
-
-  # ── Frontend Static Site ──
-  - type: web
-    name: raja-rajeshwari-frontend
-    env: static
-    plan: free
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    publishDir: dist
-    routes:
-      # Rewrite rule to handle React Router client-side SPA routing
-      - type: rewrite
-        source: /*
-        destination: /index.html

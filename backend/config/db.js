@@ -245,9 +245,9 @@ const autoSeed = async () => {
     const Category = require('../models/Category');
     const TeamMember = require('../models/TeamMember');
 
-    const adminCount = await Admin.countDocuments();
-    if (adminCount === 0) {
-      console.log('Seeding admin user account...');
+    const adminExists = await Admin.findOne({ username: 'Rajamoulichary' });
+    if (!adminExists) {
+      console.log('Seeding admin user account for Rajamoulichary...');
       const adminUser = new Admin({
         username: 'Rajamoulichary',
         password: 'Rajamoulichary@779'
@@ -255,25 +255,28 @@ const autoSeed = async () => {
       await adminUser.save();
       console.log('Created Admin account successfully. (User: Rajamoulichary, Pass: Rajamoulichary@779)');
     } else {
-      console.log('Admin account already exists.');
+      console.log('Admin account Rajamoulichary already exists.');
     }
 
     // Seed deduplicated categories list
-    const catCount = await Category.countDocuments();
-    if (catCount === 0) {
-      console.log('Seeding categories list...');
-      const uniqueCategories = [];
-      const seen = new Set();
-      for (const cat of categoriesData) {
-        if (!seen.has(cat.name_en)) {
-          seen.add(cat.name_en);
-          uniqueCategories.push(cat);
+    console.log('Verifying categories...');
+    let insertedCount = 0;
+    const seen = new Set();
+    for (const cat of categoriesData) {
+      if (!seen.has(cat.name_en)) {
+        seen.add(cat.name_en);
+        const exists = await Category.findOne({ name_en: cat.name_en });
+        if (!exists) {
+          const newCat = new Category(cat);
+          await newCat.save();
+          insertedCount++;
         }
       }
-      await Category.insertMany(uniqueCategories);
-      console.log(`Inserted ${uniqueCategories.length} categories successfully.`);
+    }
+    if (insertedCount > 0) {
+      console.log(`Inserted ${insertedCount} missing categories successfully.`);
     } else {
-      console.log(`Database already has ${catCount} categories.`);
+      console.log('All categories already exist.');
     }
 
     // Seed default Team Member (Head of Project)
@@ -291,6 +294,117 @@ const autoSeed = async () => {
       console.log('Created default team member profile for Rajamouli Chary.');
     } else {
       console.log(`Database already has ${teamCount} team members.`);
+    }
+
+    // Seed default designs
+    const Design = require('../models/Design');
+    console.log('Verifying default designs...');
+    const livingRoomCat = await Category.findOne({ name_en: 'Living Room Interior' });
+    const kitchenCat = await Category.findOne({ name_en: 'Modular Kitchen' });
+    const bedroomCat = await Category.findOne({ name_en: 'Bedroom Interior' });
+    
+    const wiringCat = await Category.findOne({ name_en: 'Complete House Wiring' });
+    const automationCat = await Category.findOne({ name_en: 'Smart Home Automation' });
+    
+    const chandelierCat = await Category.findOne({ name_en: 'Chandeliers' });
+    const ledPanelCat = await Category.findOne({ name_en: 'LED Panel Lights' });
+
+    const designsToSeed = [
+      // Interior
+      {
+        title_en: 'Royal Wooden Living Room',
+        title_te: 'రాజసం ఉట్టిపడే చెక్క లివింగ్ రూమ్',
+        category: livingRoomCat ? livingRoomCat._id : null,
+        images: [
+          'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=800&q=80'
+        ],
+        description_en: 'Premium royal design featuring rich teakwood finishes, customized wall panels, ambient spotlighting, and plush seating setups.',
+        description_te: 'ధర కట్టలేని టేకు కలప ముగింపులు, అనుకూలీకరించిన గోడ ప్యానెల్లు, యాంబియంట్ స్పాట్‌లైట్ మరియు మెత్తటి సోఫా సెటప్‌లతో కూడిన ప్రీమియం రాయల్ డిజైన్.',
+        workType: 'interior'
+      },
+      {
+        title_en: 'Contemporary Charcoal L-Shaped Kitchen',
+        title_te: 'సమకాలీన చార్‌కోల్ L-ఆకారపు వంటగది',
+        category: kitchenCat ? kitchenCat._id : null,
+        images: [
+          'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=800&q=80'
+        ],
+        description_en: 'Modern L-Shaped modular kitchen with custom charcoal-matte soft-close cabinets, pull-out wire baskets, a tall pantry unit, and seamless quartz countertops.',
+        description_te: 'అనుకూలీకరించిన చార్‌కోల్-మ్యాట్ సాఫ్ట్-క్లోజ్ క్యాబినెట్‌లు, పుల్-అవుట్ వైర్ బాస్కెట్‌లు, పొడవైన ప్యాంట్రీ యూనిట్ మరియు అతుకులు లేని క్వార్ట్జ్ కౌంటర్‌టాప్‌లతో కూడిన ఆధునిక L-ఆకారపు మాడ్యులర్ వంటగది.',
+        workType: 'interior'
+      },
+      {
+        title_en: 'Luxury Master Bedroom Suite',
+        title_te: 'లగ్జరీ మాస్టర్ బెడ్‌రూమ్ సూట్',
+        category: bedroomCat ? bedroomCat._id : null,
+        images: [
+          'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1617806118233-18e1db207f62?auto=format&fit=crop&w=800&q=80'
+        ],
+        description_en: 'Premium master bedroom interior design containing custom floor-to-ceiling cushioned headboard panel, sliding mirror wardrobes, and a matching modern dressing table.',
+        description_te: 'అనుకూలీకరించిన నేల నుండి పైకప్పు వరకు కుషన్డ్ హెడ్‌బోర్డ్ ప్యానెల్, స్లైడింగ్ అద్దాల వార్డ్‌రోబ్‌లు మరియు దానికి సరిపోయే ఆధునిక డ్రెస్సింగ్ టేబుల్‌తో కూడిన ప్రీమియం మాస్టర్ బెడ్‌రూమ్ ఇంటీరియర్ డిజైన్.',
+        workType: 'interior'
+      },
+      
+      // Electrical
+      {
+        title_en: 'Premium Smart Home Automation',
+        title_te: 'ప్రీమియం స్మార్ట్ హోమ్ ఆటోమేషన్',
+        category: automationCat ? automationCat._id : null,
+        images: ['https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=800&q=80'],
+        description_en: 'State-of-the-art smart home integration featuring centralized touch panels, mobile app controls, scene settings, and automated lighting controls for a modern luxury villa.',
+        description_te: 'ఆధునిక లగ్జరీ విల్లా కోసం కేంద్రీకృత టచ్ ప్యానెల్లు, మొబైల్ యాప్ నియంత్రణలు, సీన్ సెట్టింగ్‌లు మరియు ఆటోమేటెడ్ లైటింగ్ నియంత్రణలతో కూడిన అత్యాధునిక స్మార్ట్ హోమ్ ఇంటిగ్రేషన్.',
+        workType: 'electrical'
+      },
+      {
+        title_en: 'Complete Residential 3-Phase Wiring',
+        title_te: 'నివాస త్రీ-ఫేజ్ వైరింగ్ పనులు',
+        category: wiringCat ? wiringCat._id : null,
+        images: ['https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=800&q=80'],
+        description_en: 'Heavy-duty residential wiring featuring secure conduits, fire-resistant copper wiring, neat distribution board dressing, and proper earth protection systems.',
+        description_te: 'సురక్షితమైన పైపులు, ఫైర్-రెసిస్టెంట్ కాపర్ వైరింగ్, చక్కని డిస్ట్రిబ్యూషన్ బోర్డ్ డ్రెస్సింగ్ మరియు సరైన ఎర్తింగ్ ప్రొటెక్షన్ సిస్టమ్స్‌తో కూడిన హెవీ-డ్యూటీ నివాస త్రీ-ఫేజ్ వైరింగ్.',
+        workType: 'electrical'
+      },
+
+      // Lighting
+      {
+        title_en: 'Luxury Grand Chandelier Installation',
+        title_te: 'లగ్జరీ గ్రాండ్ జూమర్ లైటింగ్',
+        category: chandelierCat ? chandelierCat._id : null,
+        images: ['https://images.unsplash.com/photo-1520699049698-acd2fccb8cc8?auto=format&fit=crop&w=800&q=80'],
+        description_en: 'Double-height ceiling crystal chandelier installation with warm dimmable LED lights and secure structural heavy ceiling hooks for a premium living room lobby.',
+        description_te: 'ప్రీమియం లివింగ్ రూమ్ లాబీ కోసం వెచ్చని డిమ్మబుల్ LED లైట్లు మరియు సురక్షితమైన నిర్మాణ భారీ సీలింగ్ హుక్స్‌తో డబుల్-హైట్ సీలింగ్ క్రిస్టల్ జూమర్ ఇన్‌స్టాలేషన్.',
+        workType: 'lighting'
+      },
+      {
+        title_en: 'Modern Recessed Cove & LED Panel Layout',
+        title_te: 'ఆధునిక కోవ్ లైటింగ్ & ఎల్‌ఈడీ ప్యానెల్ లేఅవుట్',
+        category: ledPanelCat ? ledPanelCat._id : null,
+        images: ['https://images.unsplash.com/photo-1565814636199-ae8133055c1c?auto=format&fit=crop&w=800&q=80'],
+        description_en: 'Ambient false ceiling cove lighting integrated with energy-efficient slim LED panels and adjustable spotlights to create a luxury warm glow in the living hall.',
+        description_te: 'లివింగ్ హాల్‌లో విలాసవంతమైన వెచ్చని కాంతిని సృష్టించడానికి ఇంధన-సమర్థవంతమైన స్లిమ్ LED ప్యానెల్లు మరియు సర్దుబాటు చేయగల స్పాట్‌లైట్‌లతో కూడిన ఫాల్స్ సీలింగ్ కోవ్ లైటింగ్.',
+        workType: 'lighting'
+      }
+    ];
+
+    let seededDesignsCount = 0;
+    for (const d of designsToSeed) {
+      if (d.category) {
+        const exists = await Design.findOne({ title_en: d.title_en });
+        if (!exists) {
+          const newDesign = new Design(d);
+          await newDesign.save();
+          console.log(`Auto-seeded design: ${newDesign.title_en} (${newDesign.designId})`);
+          seededDesignsCount++;
+        }
+      }
+    }
+    if (seededDesignsCount > 0) {
+      console.log(`Successfully seeded ${seededDesignsCount} new sample designs.`);
+    } else {
+      console.log('All default sample designs already exist.');
     }
   } catch (seedError) {
     console.error('Seeding Error during auto-seed:', seedError);

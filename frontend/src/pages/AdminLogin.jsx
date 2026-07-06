@@ -70,10 +70,13 @@ export default function AdminLogin() {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Username */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-600 block">Username</label>
+            <label htmlFor="username" className="text-xs font-bold text-slate-600 block">Username</label>
             <div className="relative">
               <input
                 type="text"
+                id="username"
+                name="username"
+                autoComplete="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Enter admin username"
@@ -86,10 +89,13 @@ export default function AdminLogin() {
 
           {/* Password */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-600 block">Password</label>
+            <label htmlFor="password" className="text-xs font-bold text-slate-600 block">Password</label>
             <div className="relative">
               <input
                 type="password"
+                id="password"
+                name="password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password"

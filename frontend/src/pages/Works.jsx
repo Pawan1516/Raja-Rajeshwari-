@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Layout, CheckSquare, Wrench, Loader } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { designService, categoryService } from '../services/api';
+import { API_BASE_URL } from '../constants';
 
 export default function Works() {
   const { t, i18n } = useTranslation();
@@ -44,7 +45,7 @@ export default function Works() {
   const getImageUrl = (imagePath) => {
     if (!imagePath) return 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400&q=80';
     if (imagePath.startsWith('/uploads')) {
-      return `http://localhost:5000${imagePath}`;
+      return `${API_BASE_URL}${imagePath}`;
     }
     return imagePath;
   };

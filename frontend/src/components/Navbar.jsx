@@ -65,6 +65,8 @@ export default function Navbar() {
           <form onSubmit={handleSearchSubmit} className="hidden md:flex relative max-w-xs w-full mx-4">
             <input
               type="text"
+              id="search-desktop"
+              name="search"
               placeholder={t('common.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -183,6 +185,8 @@ export default function Navbar() {
           <form onSubmit={handleSearchSubmit} className="relative mt-2">
             <input
               type="text"
+              id="search-mobile"
+              name="search"
               placeholder={t('common.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

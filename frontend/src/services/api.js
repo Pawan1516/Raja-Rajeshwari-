@@ -5,9 +5,231 @@ import { API_URL } from '../constants';
 const API_BASE_URL = API_URL;
 
 // Mock Data for Offline Demo Mode
-const mockCategories = [];
-const mockDesigns = [];
-const mockTeam = [];
+const mockCategories = [
+  {
+    _id: "cat_living_room",
+    name_en: 'Living Room Design',
+    name_te: 'లివింగ్ రూమ్ డిజైన్',
+    image: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80',
+    workType: 'interior'
+  },
+  {
+    _id: "cat_modular_kitchen",
+    name_en: 'Modular Kitchen',
+    name_te: 'మోడ్యులర్ కిచెన్',
+    image: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=800&q=80',
+    workType: 'interior'
+  },
+  {
+    _id: "cat_bedroom",
+    name_en: 'Bedroom Interior',
+    name_te: 'బెడ్‌రూమ్ ఇంటీరియర్',
+    image: 'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=800&q=80',
+    workType: 'interior'
+  },
+  {
+    _id: "cat_dining_room",
+    name_en: 'Dining Room Design',
+    name_te: 'డైనింగ్ రూమ్ డిజైన్',
+    image: 'https://images.unsplash.com/photo-1617806118233-18e1db207f62?auto=format&fit=crop&w=800&q=80',
+    workType: 'interior'
+  },
+  {
+    _id: "cat_tv_unit",
+    name_en: 'TV Unit Design',
+    name_te: 'టీవీ యూనిట్ డిజైన్',
+    image: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=800&q=80',
+    workType: 'interior'
+  },
+  {
+    _id: "cat_false_ceiling",
+    name_en: 'False Ceiling Design',
+    name_te: 'ఫాల్స్ సీలింగ్ డిజైన్',
+    image: 'https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=800&q=80',
+    workType: 'interior'
+  },
+  {
+    _id: "cat_lighting_design",
+    name_en: 'Lighting Design',
+    name_te: 'లైటింగ్ డిజైన్',
+    image: 'https://images.unsplash.com/photo-1565814636199-ae8133055c1c?auto=format&fit=crop&w=800&q=80',
+    workType: 'lighting'
+  },
+  {
+    _id: "cat_wall_decor",
+    name_en: 'Wall Decor & Paneling',
+    name_te: 'వాల్ డెకర్ & ప్యానెలింగ్',
+    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80',
+    workType: 'interior'
+  },
+  {
+    _id: "cat_wiring",
+    name_en: 'Complete House Wiring',
+    name_te: 'పూర్తి హౌస్ వైరింగ్',
+    image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=800&q=80',
+    workType: 'electrical'
+  },
+  {
+    _id: "cat_automation",
+    name_en: 'Smart Home Automation',
+    name_te: 'స్మార్ట్ హోమ్ ఆటోమేషన్',
+    image: 'https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=800&q=80',
+    workType: 'electrical'
+  },
+  {
+    _id: "cat_chandeliers",
+    name_en: 'Chandeliers',
+    name_te: 'ఝూమర్లు (చాండెలియర్స్)',
+    image: 'https://images.unsplash.com/photo-1520699049698-acd2fccb8cc8?auto=format&fit=crop&w=800&q=80',
+    workType: 'lighting'
+  }
+];
+
+const mockDesigns = [
+  {
+    _id: 'design_living_room_royal',
+    designId: 'RLIW-1001',
+    title_en: 'Royal Wooden Living Room',
+    title_te: 'రాజసం ఉట్టిపడే చెక్క లివింగ్ రూమ్',
+    category: {
+      _id: "cat_living_room",
+      name_en: 'Living Room Design',
+      name_te: 'లివింగ్ రూమ్ డిజైన్',
+      workType: 'interior'
+    },
+    images: [
+      'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=800&q=80'
+    ],
+    description_en: 'Premium royal design featuring rich teakwood finishes, customized wall panels, ambient spotlighting, and plush seating setups. Perfect for spacious villas and premium apartments.',
+    description_te: 'ధర కట్టలేని టేకు కలప ముగింపులు, అనుకూలీకరించిన గోడ ప్యానెల్లు, యాంబియంట్ స్పాట్‌లైట్ మరియు మెత్తటి సోఫా సెటప్‌లతో కూడిన ప్రీమియం రాయల్ డిజైన్. విశాలమైన విల్లాలు మరియు ప్రీమియం అపార్ట్‌మెంట్‌లకు సరిపోతుంది.'
+  },
+  {
+    _id: 'design_kitchen_contemporary',
+    designId: 'RLIW-1002',
+    title_en: 'Contemporary Charcoal L-Shaped Kitchen',
+    title_te: 'సమకాలీన చార్‌కోల్ L-ఆకారపు వంటగది',
+    category: {
+      _id: "cat_modular_kitchen",
+      name_en: 'Modular Kitchen',
+      name_te: 'మోడ్యులర్ కిచెన్',
+      workType: 'interior'
+    },
+    images: [
+      'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=800&q=80'
+    ],
+    description_en: 'Modern L-Shaped modular kitchen with custom charcoal-matte soft-close cabinets, pull-out wire baskets, a tall pantry unit, and seamless quartz countertops.',
+    description_te: 'అనుకూలీకరించిన చార్‌కోల్-మ్యాట్ సాఫ్ట్-క్లోజ్ క్యాబినెట్‌లు, పుల్-అవుట్ వైర్ బాస్కెట్‌లు, పొడవైన ప్యాంట్రీ యూనిట్ మరియు అతుకులు లేని క్వార్ట్జ్ కౌంటర్‌టాప్‌లతో కూడిన ఆధునిక L-ఆకారపు మాడ్యులర్ వంటగది.'
+  },
+  {
+    _id: 'design_tv_unit_floating',
+    designId: 'RLIW-1003',
+    title_en: 'Minimalist Floating TV Console',
+    title_te: 'మినిమలిస్ట్ ఫ్లోటింగ్ టీవీ కన్సోల్',
+    category: {
+      _id: "cat_tv_unit",
+      name_en: 'TV Unit Design',
+      name_te: 'టీవీ యూనిట్ డిజైన్',
+      workType: 'interior'
+    },
+    images: [
+      'https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?auto=format&fit=crop&w=800&q=80'
+    ],
+    description_en: 'Floating wood-veneer TV cabinet featuring concealed cable routing slots, integrated warm-white LED backlighting, and display shelves for home decor.',
+    description_te: 'దాచిన కేబుల్ రూటింగ్ స్లాట్లు, ఇంటిగ్రేటెడ్ వార్మ్-వైట్ LED బ్యాక్‌లైటింగ్ మరియు డెకర్ ప్రదర్శనల కొరకు అందమైన షెల్ఫ్‌లతో కూడిన తేలియాడే చెక్క-వెనీర్ టీవీ క్యాబినెట్.'
+  },
+  {
+    _id: 'design_bedroom_luxury',
+    designId: 'RLIW-1004',
+    title_en: 'Luxury Master Bedroom Suite',
+    title_te: 'లగ్జరీ మాస్టర్ బెడ్‌రూమ్ సూట్',
+    category: {
+      _id: "cat_bedroom",
+      name_en: 'Bedroom Interior',
+      name_te: 'బెడ్‌రూమ్ ఇంటీరియర్',
+      workType: 'interior'
+    },
+    images: [
+      'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1617806118233-18e1db207f62?auto=format&fit=crop&w=800&q=80'
+    ],
+    description_en: 'Premium master bedroom interior design containing custom floor-to-ceiling cushioned headboard panel, sliding mirror wardrobes, and a matching modern dressing table.',
+    description_te: 'అనుకూలీకరించిన నేల నుండి పైకప్పు వరకు కుషన్డ్ హెడ్‌బోర్డ్ ప్యానెల్, స్లైడింగ్ అద్దాల వార్డ్‌రోబ్‌లు మరియు దానికి సరిపోయే ఆధునిక డ్రెస్సింగ్ టేబుల్‌తో కూడిన ప్రీమియం మాస్టర్ బెడ్‌రూమ్ ఇంటీరియర్ డిజైన్.'
+  },
+  {
+    _id: 'design_automation_smart',
+    designId: 'RLIW-1005',
+    title_en: 'Premium Smart Home Automation',
+    title_te: 'ప్రీమియం స్మార్ట్ హోమ్ ఆటోమేషన్',
+    category: {
+      _id: "cat_automation",
+      name_en: 'Smart Home Automation',
+      name_te: 'స్మార్ట్ హోమ్ ఆటోమేషన్',
+      workType: 'electrical'
+    },
+    images: ['https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=800&q=80'],
+    description_en: 'State-of-the-art smart home integration featuring centralized touch panels, mobile app controls, scene settings, and automated lighting controls for a modern luxury villa.',
+    description_te: 'ఆధునిక లగ్జరీ విల్లా కోసం కేంద్రీకృత టచ్ ప్యానెల్లు, మొబైల్ యాప్ నియంత్రణలు, సీన్ సెట్టింగ్‌లు మరియు ఆటోమేటెడ్ లైటింగ్ నియంత్రణలతో కూడిన అత్యాధునిక స్మార్ట్ హోమ్ ఇంటిగ్రేషన్.'
+  },
+  {
+    _id: 'design_wiring_3phase',
+    designId: 'RLIW-1006',
+    title_en: 'Complete Residential 3-Phase Wiring',
+    title_te: 'నివాస త్రీ-ఫేజ్ వైరింగ్ పనులు',
+    category: {
+      _id: "cat_wiring",
+      name_en: 'Complete House Wiring',
+      name_te: 'పూర్తి హౌస్ వైరింగ్',
+      workType: 'electrical'
+    },
+    images: ['https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=800&q=80'],
+    description_en: 'Heavy-duty residential wiring featuring secure conduits, fire-resistant copper wiring, neat distribution board dressing, and proper earth protection systems.',
+    description_te: 'సురక్షితమైన పైపులు, ఫైర్-రెసిస్టెంట్ కాపర్ వైరింగ్, చక్కని డిస్ట్రిబ్యూషన్ బోర్డ్ డ్రెస్సింగ్ మరియు సరైన ఎర్తింగ్ ప్రొటెక్షన్ సిస్టమ్స్‌తో కూడిన హెవీ-డ్యూటీ నివాస త్రీ-ఫేజ్ వైరింగ్.'
+  },
+  {
+    _id: 'design_chandelier_crystal',
+    designId: 'RLIW-1007',
+    title_en: 'Luxury Grand Chandelier Installation',
+    title_te: 'లగ్జరీ గ్రాండ్ జూమర్ లైటింగ్',
+    category: {
+      _id: "cat_chandeliers",
+      name_en: 'Chandeliers',
+      name_te: 'ఝూమర్లు (చాండెలియర్స్)',
+      workType: 'lighting'
+    },
+    images: ['https://images.unsplash.com/photo-1520699049698-acd2fccb8cc8?auto=format&fit=crop&w=800&q=80'],
+    description_en: 'Double-height ceiling crystal chandelier installation with warm dimmable LED lights and secure structural heavy ceiling hooks for a premium living room lobby.',
+    description_te: 'ప్రీమియం లివింగ్ రూమ్ లాబీ కోసం వెచ్చని డిమ్మబుల్ LED లైట్లు మరియు సురక్షితమైన నిర్మాణ భారీ సీలింగ్ హుక్స్‌తో డబుల్-హైట్ సీలింగ్ క్రిస్టల్ జూమర్ ఇన్‌స్థాలేషన్.'
+  },
+  {
+    _id: 'design_led_cove',
+    designId: 'RLIW-1008',
+    title_en: 'Modern Recessed Cove & LED Panel Layout',
+    title_te: 'ఆధునిక కోవ్ లైటింగ్ & ఎల్‌ఈడీ ప్యానెల్ లేఅవుట్',
+    category: {
+      _id: "cat_led_panel",
+      name_en: 'LED Panel Lights',
+      name_te: 'ఎల్‌ఈడీ ప్యానెల్ లైట్లు',
+      workType: 'lighting'
+    },
+    images: ['https://images.unsplash.com/photo-1565814636199-ae8133055c1c?auto=format&fit=crop&w=800&q=80'],
+    description_en: 'Ambient false ceiling cove lighting integrated with energy-efficient slim LED panels and adjustable spotlights to create a luxury warm glow in the living hall.',
+    description_te: 'లివింగ్ హాల్‌లో విలాసవంతమైన వెచ్చని కాంతిని సృష్టించడానికి ఇంధన-సమర్థవంతమైన స్లిమ్ LED ప్యానెల్లు మరియు సర్దుబాటు చేయగల స్పాట్‌లైట్‌లతో కూడిన ఫాల్స్ సీలింగ్ కోవ్ లైటింగ్.'
+  }
+];
+
+const mockTeam = [
+  {
+    _id: 'team_rajamouli_chary',
+    name: 'Rajamouli Chary',
+    role: 'Founder & Head Carpentry Craftsman',
+    role_te: 'స్థాపకుడు & ప్రధాన వడ్రంగి హస్తకళాకారుడు',
+    exp: '25+ Years',
+    image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400&q=80'
+  }
+];
 const mockInquiries = [];
 
 const api = axios.create({

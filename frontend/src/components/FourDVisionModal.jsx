@@ -2,6 +2,7 @@ import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useTexture, Center, Float, Sparkles, Html } from '@react-three/drei';
 import { X, Sun, Moon, Sparkle, Film, Move, Info, ZoomIn } from 'lucide-react';
+import { API_BASE_URL } from '../constants';
 import * as THREE from 'three';
 import { createLuminanceDepthMap } from '../utils/depthMapGenerator';
 
@@ -159,7 +160,7 @@ export default function FourDVisionModal({ isOpen, imageUrl, depthMapUrl: dbDept
       
       // Resolve backend path relative to API if it is a local path (starts with /uploads)
       const resolvedDbUrl = dbDepthMapUrl && dbDepthMapUrl.startsWith('/uploads')
-        ? `http://localhost:5000${dbDepthMapUrl}`
+        ? `${API_BASE_URL}${dbDepthMapUrl}`
         : dbDepthMapUrl;
 
       if (resolvedDbUrl) {

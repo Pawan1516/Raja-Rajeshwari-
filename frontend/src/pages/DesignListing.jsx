@@ -100,6 +100,8 @@ export default function DesignListing() {
         <form onSubmit={handleSearchSubmit} className="flex relative w-full md:max-w-xs shrink-0">
           <input
             type="text"
+            id="search-designs"
+            name="search"
             placeholder={t('common.search')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}

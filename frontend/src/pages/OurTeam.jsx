@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Award, Star } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { teamService } from '../services/api';
+import { API_BASE_URL } from '../constants';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -40,7 +41,7 @@ export default function OurTeam() {
   const getImageUrl = (imagePath) => {
     if (!imagePath) return 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400&q=80';
     if (imagePath.startsWith('/uploads')) {
-      return `http://localhost:5000${imagePath}`;
+      return `${API_BASE_URL}${imagePath}`;
     }
     return imagePath;
   };
