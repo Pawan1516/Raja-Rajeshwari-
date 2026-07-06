@@ -25,16 +25,48 @@ function ImmersiveScene({ imageUrl, depthMapUrl, displacementScale, cinematicEna
     const time = state.clock.getElapsedTime();
 
     if (cinematicEnabled) {
-      // Cinematic Camera Path: slow sweep in a figure-8 shape
-      const radius = 5.2;
-      targetCameraPos.current.x = Math.sin(time * 0.2) * 0.65;
-      targetCameraPos.current.y = Math.cos(time * 0.3) * 0.35;
-      targetCameraPos.current.z = radius + Math.sin(time * 0.1) * 0.4;
+      // AI Video 10-second loop phase
+      const cycle = (time % 10) / 10; // 0.0 to 1.0
+      
+      // Zoom-in and zoom-out loop simulation
+      let zoom = 5.4;
+      if (cycle < 0.3) {
+        // Zoom in from 5.4 to 4.7
+        zoom = 5.4 - (cycle / 0.3) * 0.7;
+      } else if (cycle < 0.7) {
+        // Hold close shot and pan slowly at 4.7
+        zoom = 4.7;
+      } else {
+        // Zoom out from 4.7 back to 5.4
+        zoom = 4.7 + ((cycle - 0.7) / 0.3) * 0.7;
+      }
+
+      // Figure-8 Slow Cinematic Pan
+      const panX = Math.sin(time * 0.55) * 0.32;
+      const panY = Math.cos(time * 0.75) * 0.16;
+
+      // Human hand-held camera shake (high frequency noise)
+      const shakeX = Math.sin(time * 20.0) * 0.007;
+      const shakeY = Math.cos(time * 16.0) * 0.007;
+
+      targetCameraPos.current.x = panX + shakeX;
+      targetCameraPos.current.y = panY + shakeY;
+      targetCameraPos.current.z = zoom;
+
+      // Animate spotlight flicker directly via ref
+      if (spotLightRef.current) {
+        const flickerVal = Math.sin(time * 15.0) * 0.07 + Math.cos(time * 26.0) * 0.03;
+        spotLightRef.current.intensity = Math.max(0.1, spotIntensity + flickerVal);
+      }
     } else {
       // Mouse-based Parallax Interaction
-      targetCameraPos.current.x = mouse.x * 0.8;
-      targetCameraPos.current.y = mouse.y * 0.5;
+      targetCameraPos.current.x = mouse.x * 0.85;
+      targetCameraPos.current.y = mouse.y * 0.55;
       targetCameraPos.current.z = 5.2;
+
+      if (spotLightRef.current) {
+        spotLightRef.current.intensity = spotIntensity;
+      }
     }
 
     // Smoothly interpolate the camera position
@@ -152,6 +184,77 @@ export default function FourDVisionModal({ isOpen, imageUrl, depthMapUrl: dbDept
   const [mood, setMood] = useState('luxury'); // warm, cool, luxury
   const [dayNight, setDayNight] = useState('day'); // day, night
 
+  // MediaRecorder video simulation exporter
+  const [recording, setRecording] = useState(false);
+  const [recordProgress, setRecordProgress] = useState(0);
+
+  const handleRecordVideo = async () => {
+    const canvas = document.querySelector('.vision-canvas canvas');
+    if (!canvas) return;
+
+    try {
+      setRecording(true);
+      setRecordProgress(0);
+
+      // Force cinematic sweep active for beautiful motion recording
+      setCinematicEnabled(true);
+
+      const stream = canvas.captureStream(30); // 30 FPS
+      
+      let options = { mimeType: 'video/webm;codecs=vp9' };
+      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        options = { mimeType: 'video/webm;codecs=vp8' };
+        if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+          options = { mimeType: 'video/webm' };
+          if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+            options = {};
+          }
+        }
+      }
+
+      const mediaRecorder = new MediaRecorder(stream, options);
+      const chunks = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          chunks.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${title.replace(/\s+/g, '_')}_3d_vision.webm`;
+        a.click();
+        URL.revokeObjectURL(url);
+        setRecording(false);
+        setRecordProgress(0);
+      };
+
+      mediaRecorder.start();
+
+      // Record for exactly 10 seconds (one full camera loop)
+      const duration = 10000;
+      const intervalTime = 100;
+      let elapsed = 0;
+
+      const timer = setInterval(() => {
+        elapsed += intervalTime;
+        setRecordProgress(Math.min(Math.floor((elapsed / duration) * 100), 100));
+        if (elapsed >= duration) {
+          clearInterval(timer);
+          mediaRecorder.stop();
+        }
+      }, intervalTime);
+
+    } catch (err) {
+      console.error("Recording failed:", err);
+      setRecording(false);
+    }
+  };
+
   // Use pre-computed database depth map if available, otherwise estimate on-the-fly
   useEffect(() => {
     if (isOpen) {
@@ -207,7 +310,7 @@ export default function FourDVisionModal({ isOpen, imageUrl, depthMapUrl: dbDept
       <div className="flex-grow w-full relative flex flex-col lg:flex-row">
         
         {/* WebGL 3D Viewer Area */}
-        <div className="flex-grow h-full relative">
+        <div className="flex-grow h-full relative vision-canvas">
           {loading ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 z-10 gap-3.5">
               <div className="w-10 h-10 border-4 border-wood border-t-transparent rounded-full animate-spin"></div>
@@ -223,7 +326,7 @@ export default function FourDVisionModal({ isOpen, imageUrl, depthMapUrl: dbDept
                 <span className="text-slate-400 text-xs font-bold uppercase tracking-wider">Initializing WebGL Scene...</span>
               </div>
             }>
-              <Canvas shadows camera={{ position: [0, 0, 5.2], fov: 45 }}>
+              <Canvas shadows gl={{ preserveDrawingBuffer: true }} camera={{ position: [0, 0, 5.2], fov: 45 }}>
                 <ImmersiveScene 
                   imageUrl={imageUrl} 
                   depthMapUrl={depthMapUrl}
@@ -339,18 +442,59 @@ export default function FourDVisionModal({ isOpen, imageUrl, depthMapUrl: dbDept
 
             {/* Cinematic Camera Sweep toggle */}
             <div className="space-y-2">
-              <span className="text-xs font-bold text-slate-300 block">Camera Sweep Mode</span>
-              <button
-                onClick={() => setCinematicEnabled(!cinematicEnabled)}
-                className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold border transition-smooth ${
-                  cinematicEnabled 
-                    ? 'bg-forest border-forest text-white shadow-lg shadow-forest/10' 
-                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                {cinematicEnabled ? <Film className="w-4 h-4" /> : <Move className="w-4 h-4" />}
-                <span>{cinematicEnabled ? 'Cinematic Walkthrough' : 'Mouse Parallax'}</span>
-              </button>
+              <span className="text-xs font-bold text-slate-300 block">AI Cinematic Mode</span>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => setCinematicEnabled(true)}
+                  className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold border transition-smooth ${
+                    cinematicEnabled 
+                      ? 'bg-forest border-forest text-white shadow-lg shadow-forest/10' 
+                      : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Film className="w-3.5 h-3.5" />
+                  <span>Cinematic Play</span>
+                </button>
+                <button
+                  onClick={() => setCinematicEnabled(false)}
+                  className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold border transition-smooth ${
+                    !cinematicEnabled 
+                      ? 'bg-wood border-wood text-white shadow-lg shadow-wood/10' 
+                      : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Move className="w-3.5 h-3.5" />
+                  <span>Free Look</span>
+                </button>
+              </div>
+            </div>
+
+            {/* AI 3D Video Export block */}
+            <div className="space-y-2 border-t border-slate-805 pt-4">
+              <span className="text-xs font-bold text-slate-300 block">AI 3D Video Simulator</span>
+              {recording ? (
+                <div className="space-y-2 bg-slate-950 p-3.5 rounded-xl border border-slate-800/60">
+                  <div className="flex justify-between items-center text-[10px] font-extrabold text-amber-300 uppercase tracking-widest animate-pulse">
+                    <span>Rendering Frame buffer...</span>
+                    <span>{recordProgress}%</span>
+                  </div>
+                  <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                    <div 
+                      className="bg-amber-400 h-full rounded-full transition-all duration-150" 
+                      style={{ width: `${recordProgress}%` }}
+                    ></div>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleRecordVideo}
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl text-xs font-bold transition-smooth shadow-lg shadow-amber-500/10 hover:scale-[1.01] active:scale-95 border border-amber-400/25"
+                >
+                  <Film className="w-4 h-4 text-slate-950 animate-pulse" />
+                  <span>Generate & Export AI 3D Video</span>
+                </button>
+              )}
             </div>
           </div>
 
