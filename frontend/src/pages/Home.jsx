@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, MessageSquare, Phone, Award, Users, CheckCircle, ShieldCheck, ChevronRight, ChevronLeft, Sparkles, MapPin, Mail, Clock, ExternalLink } from 'lucide-react';
 import { categoryService, designService } from '../services/api';
 import { TEL_LINK, WA_GENERAL_LINK, buildWALink, PHONE_DISPLAY } from '../constants';
-import FourDVisionModal from '../components/FourDVisionModal';
 
 // Lazy load 3D component to avoid blocking initial render
 const InteriorShowcase3D = lazy(() => import('../components/InteriorShowcase3D'));
@@ -123,17 +122,6 @@ export default function Home() {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
-  const [is3DOpen, setIs3DOpen] = useState(false);
-  const [selected3DImage, setSelected3DImage] = useState('');
-  const [selected3DTitle, setSelected3DTitle] = useState('');
-  const [selected3DDepthMap, setSelected3DDepthMap] = useState('');
-
-  const handleOpen3D = (design) => {
-    setSelected3DImage(design.images[0]);
-    setSelected3DTitle(i18n.language === 'te' ? design.title_te : design.title_en);
-    setSelected3DDepthMap(design.depthMap || '');
-    setIs3DOpen(true);
-  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -174,16 +162,7 @@ export default function Home() {
       {/* ─── HERO SECTION: Premium Full-Screen Background Image Slideshow ─── */}
       <section className="relative bg-slate-950 overflow-hidden min-h-[90vh] flex items-center">
         {/* Background image slider */}
-        <div 
-          onClick={() => {
-            setSelected3DImage(slides[currentSlide].image);
-            setSelected3DTitle(i18n.language === 'te' ? slides[currentSlide].title_te : slides[currentSlide].title_en);
-            setSelected3DDepthMap('');
-            setIs3DOpen(true);
-          }}
-          className="absolute inset-0 z-0 cursor-pointer"
-          title="Click to view in 4D Vision"
-        >
+        <div className="absolute inset-0 z-0">
           <AnimatePresence mode="wait">
             <motion.img
               key={currentSlide}
@@ -434,18 +413,6 @@ export default function Home() {
                     <span className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-[10px] tracking-wider font-extrabold uppercase px-2.5 py-1 rounded-md">
                       {design.designId}
                     </span>
-                    <div className="absolute bottom-3 left-3 right-3 z-10 flex justify-center">
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleOpen3D(design);
-                        }}
-                        className="w-full bg-slate-900/85 hover:bg-slate-900 text-white text-[10px] tracking-wider font-extrabold uppercase py-2 rounded-xl backdrop-blur-md transition-smooth shadow-md flex items-center justify-center gap-1.5 hover:scale-105 active:scale-95"
-                      >
-                        <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
-                        <span>View in 3D Vision</span>
-                      </button>
-                    </div>
                   </div>
 
                   <div className="p-5 flex flex-col flex-grow justify-between">
@@ -832,13 +799,6 @@ export default function Home() {
         </div>
       </section>
 
-      <FourDVisionModal
-        isOpen={is3DOpen}
-        imageUrl={selected3DImage}
-        depthMapUrl={selected3DDepthMap}
-        title={selected3DTitle}
-        onClose={() => setIs3DOpen(false)}
-      />
     </div>
   );
 }

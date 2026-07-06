@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, MessageSquare, Phone, AlertCircle, Sparkles } from 'lucide-react';
 import { designService, categoryService } from '../services/api';
 import { TEL_LINK, buildWALink } from '../constants';
-import FourDVisionModal from '../components/FourDVisionModal';
 
 const cardVariant = {
   hidden: { opacity: 0, y: 24 },
@@ -23,17 +22,6 @@ export default function DesignListing() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [is3DOpen, setIs3DOpen] = useState(false);
-  const [selected3DImage, setSelected3DImage] = useState('');
-  const [selected3DTitle, setSelected3DTitle] = useState('');
-  const [selected3DDepthMap, setSelected3DDepthMap] = useState('');
-
-  const handleOpen3D = (design) => {
-    setSelected3DImage(design.images[0]);
-    setSelected3DTitle(i18n.language === 'te' ? design.title_te : design.title_en);
-    setSelected3DDepthMap(design.depthMap || '');
-    setIs3DOpen(true);
-  };
 
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
   const [selectedWorkType, setSelectedWorkType] = useState(searchParams.get('workType') || '');
@@ -224,18 +212,6 @@ export default function DesignListing() {
                       <span className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-sm text-white text-[10px] tracking-wider font-extrabold uppercase px-2.5 py-1 rounded-md">
                         {design.designId}
                       </span>
-                      <div className="absolute bottom-3 left-3 right-3 z-10 flex justify-center">
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleOpen3D(design);
-                          }}
-                          className="w-full bg-slate-900/85 hover:bg-slate-900 text-white text-[10px] tracking-wider font-extrabold uppercase py-2 rounded-xl backdrop-blur-md transition-smooth shadow-md flex items-center justify-center gap-1.5 hover:scale-105 active:scale-95"
-                        >
-                          <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
-                          <span>View in 3D Vision</span>
-                        </button>
-                      </div>
                     </div>
 
                     <div className="p-5 flex flex-col flex-grow justify-between">
@@ -286,13 +262,6 @@ export default function DesignListing() {
         </div>
       </div>
 
-      <FourDVisionModal
-        isOpen={is3DOpen}
-        imageUrl={selected3DImage}
-        depthMapUrl={selected3DDepthMap}
-        title={selected3DTitle}
-        onClose={() => setIs3DOpen(false)}
-      />
     </div>
   );
 }
