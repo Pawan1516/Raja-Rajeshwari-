@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ShieldCheck, Award, CheckCircle, HardHat, User, Star, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { teamService } from '../services/api';
+import { API_BASE_URL } from '../constants';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -19,6 +21,30 @@ const staggerContainer = {
 
 export default function Experience() {
   const { t, i18n } = useTranslation();
+  const [founder, setFounder] = useState(null);
+
+  useEffect(() => {
+    const fetchFounder = async () => {
+      try {
+        const team = await teamService.getAll();
+        const found = team.find(m => m.name.toLowerCase().includes('rajamouli') || m.role.toLowerCase().includes('founder'));
+        if (found) {
+          setFounder(found);
+        }
+      } catch (err) {
+        console.error('Error fetching founder data:', err);
+      }
+    };
+    fetchFounder();
+  }, []);
+
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return '/owner.jpg';
+    if (imagePath.startsWith('/uploads')) {
+      return `${API_BASE_URL}${imagePath}`;
+    }
+    return imagePath;
+  };
 
   const stats = [
     { 
@@ -107,7 +133,7 @@ export default function Experience() {
               Leadership Profile
             </span>
             <h2 className="text-3xl font-outfit font-extrabold text-slate-900">
-              {t('experience.founder_title')}
+              {founder ? (i18n.language === 'te' ? founder.role_te : founder.role) : t('experience.founder_title')}
             </h2>
             <div className="w-12 h-1 bg-wood mx-auto"></div>
           </div>
@@ -116,8 +142,8 @@ export default function Experience() {
           <div className="relative w-44 h-44 mx-auto group">
             <div className="w-full h-full rounded-full border-4 border-wood bg-slate-100 flex items-center justify-center shadow-xl overflow-hidden">
               <img 
-                src="/owner.jpg" 
-                alt="Rajamouli Chary" 
+                src={founder ? getImageUrl(founder.image) : '/owner.jpg'} 
+                alt={founder ? founder.name : "Rajamouli Chary"} 
                 className="w-full h-full object-cover object-top group-hover:scale-105 transition-smooth duration-500"
               />
             </div>
@@ -129,7 +155,7 @@ export default function Experience() {
           {/* Profile Name & Rating */}
           <div className="space-y-2">
             <h3 className="font-outfit font-extrabold text-2xl text-slate-900">
-              Rajamouli Chary
+              {founder ? founder.name : 'Rajamouli Chary'}
             </h3>
             <div className="flex items-center justify-center gap-1 text-amber-500 text-xs">
               <Star className="w-4 h-4 fill-current" />
