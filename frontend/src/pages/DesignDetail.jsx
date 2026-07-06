@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { MessageSquare, Phone, ArrowLeft, Calendar, Tag } from 'lucide-react';
+import { MessageSquare, Phone, ArrowLeft, Calendar, Tag, Sparkles } from 'lucide-react';
 import { designService } from '../services/api';
 import { TEL_LINK, buildWALink } from '../constants';
+import FourDVisionModal from '../components/FourDVisionModal';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
@@ -22,6 +23,19 @@ export default function DesignDetail() {
   const [design, setDesign] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+  const [is3DOpen, setIs3DOpen] = useState(false);
+  const [selected3DImage, setSelected3DImage] = useState('');
+  const [selected3DTitle, setSelected3DTitle] = useState('');
+  const [selected3DDepthMap, setSelected3DDepthMap] = useState('');
+
+  const handleOpen3D = () => {
+    if (!design) return;
+    setSelected3DImage(design.images[activeImageIndex] || design.images[0]);
+    setSelected3DTitle(i18n.language === 'te' ? design.title_te : design.title_en);
+    setSelected3DDepthMap(design.depthMap || '');
+    setIs3DOpen(true);
+  };
 
   useEffect(() => {
     designService.getById(id)
@@ -115,7 +129,7 @@ export default function DesignDetail() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="aspect-[4/3] rounded-3xl overflow-hidden shadow-premium border border-slate-100 bg-slate-50 relative">
+            <div className="aspect-[4/3] rounded-3xl overflow-hidden shadow-premium border border-slate-100 bg-slate-50 relative group">
               <img
                 src={design.images[activeImageIndex] || design.images[0]}
                 alt={localizedTitle}
@@ -124,6 +138,19 @@ export default function DesignDetail() {
               <span className="absolute top-4 left-4 bg-slate-900/80 backdrop-blur-md text-white text-xs tracking-wider font-extrabold uppercase px-3 py-1.5 rounded-lg">
                 {design.designId}
               </span>
+              <div className="absolute bottom-4 left-4 right-4 z-10 flex justify-center">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleOpen3D();
+                  }}
+                  className="w-full sm:w-auto bg-slate-900/85 hover:bg-slate-900 text-white text-[11px] tracking-wider font-extrabold uppercase px-6 py-2.5 rounded-xl backdrop-blur-md transition-smooth shadow-md flex items-center justify-center gap-1.5 hover:scale-105 active:scale-95"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
+                  <span>View in 4D AI Vision</span>
+                </button>
+              </div>
             </div>
 
             {/* Thumbnails */}
@@ -191,23 +218,33 @@ export default function DesignDetail() {
             )}
 
             {/* Desktop Action Buttons */}
-            <motion.div variants={fadeUp} custom={4} className="hidden sm:flex flex-col sm:flex-row gap-4 pt-4">
-              <a
-                href={getWhatsAppLink()}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center justify-center gap-2.5 bg-whatsapp hover:bg-whatsappdark text-white px-8 py-4 rounded-full font-bold transition-smooth shadow-lg shadow-whatsapp/20 hover:scale-[1.02] flex-1"
+            <motion.div variants={fadeUp} custom={4} className="hidden sm:flex flex-col gap-3 pt-4">
+              <button
+                type="button"
+                onClick={handleOpen3D}
+                className="flex items-center justify-center gap-2.5 bg-slate-900 hover:bg-slate-800 text-white px-8 py-3.5 rounded-full font-bold transition-smooth shadow-md hover:scale-[1.01] active:scale-95 border border-white/10"
               >
-                <MessageSquare className="w-5 h-5" />
-                <span>{t('common.chat_whatsapp')}</span>
-              </a>
-              <a
-                href={TEL_LINK}
-                className="flex items-center justify-center gap-2.5 bg-forest hover:bg-forest-dark text-white px-8 py-4 rounded-full font-bold transition-smooth shadow-call-glow shadow-call-glow-hover flex-1"
-              >
-                <Phone className="w-5 h-5" />
-                <span>{t('common.call_now')}</span>
-              </a>
+                <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
+                <span>Immersive 4D Vision Mode</span>
+              </button>
+              <div className="flex gap-4">
+                <a
+                  href={getWhatsAppLink()}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-center gap-2.5 bg-whatsapp hover:bg-whatsappdark text-white px-8 py-3.5 rounded-full font-bold transition-smooth shadow-lg shadow-whatsapp/20 hover:scale-[1.02] flex-1"
+                >
+                  <MessageSquare className="w-5 h-5" />
+                  <span>{t('common.chat_whatsapp')}</span>
+                </a>
+                <a
+                  href={TEL_LINK}
+                  className="flex items-center justify-center gap-2.5 bg-forest hover:bg-forest-dark text-white px-8 py-3.5 rounded-full font-bold transition-smooth shadow-call-glow shadow-call-glow-hover flex-1"
+                >
+                  <Phone className="w-5 h-5" />
+                  <span>{t('common.call_now')}</span>
+                </a>
+              </div>
             </motion.div>
 
             <motion.p variants={fadeUp} custom={5} className="hidden sm:block text-xs text-slate-400 italic">
@@ -246,6 +283,14 @@ export default function DesignDetail() {
           Tap to connect with our design team instantly
         </p>
       </motion.div>
+
+      <FourDVisionModal
+        isOpen={is3DOpen}
+        imageUrl={selected3DImage}
+        depthMapUrl={selected3DDepthMap}
+        title={selected3DTitle}
+        onClose={() => setIs3DOpen(false)}
+      />
     </>
   );
 }

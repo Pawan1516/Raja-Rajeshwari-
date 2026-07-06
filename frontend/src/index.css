@@ -83,3 +83,32 @@
     text-decoration: none;
   }
 }
+
+/* Glassmorphism Premium with gold tinges */
+.glass-premium {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(196, 164, 132, 0.18); /* wood.light/18% */
+}
+
+.glass-premium-dark {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.shadow-glow-gold {
+  box-shadow: 0 10px 30px -10px rgba(139, 90, 43, 0.2), 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-glow-gold-hover:hover {
+  box-shadow: 0 20px 40px -10px rgba(139, 90, 43, 0.35), 0 4px 6px rgba(0, 0, 0, 0.05);
+  transform: translateY(-4px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transition-premium {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}

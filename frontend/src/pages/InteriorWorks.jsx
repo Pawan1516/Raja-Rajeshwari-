@@ -152,15 +152,15 @@ export default function InteriorWorks() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* ─── GLASSMORPHIC TABS BAR ─── */}
-        <div className="flex overflow-x-auto gap-2.5 pb-4 mb-10 hide-scrollbar snap-x scroll-smooth">
+        <div className="flex overflow-x-auto gap-2 p-2 mb-10 hide-scrollbar snap-x scroll-smooth glass-premium rounded-3xl border border-slate-200/50 shadow-sm max-w-full">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-5 py-3 rounded-full text-xs font-bold transition-all shrink-0 snap-start border ${
+              className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold transition-smooth shrink-0 snap-start ${
                 activeTab === tab.id
-                  ? 'bg-wood text-white border-wood shadow-md scale-[1.02]'
-                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                  ? 'bg-wood text-white shadow-md shadow-wood/15 scale-[1.01]'
+                  : 'text-slate-600 hover:bg-white/60 hover:text-slate-900'
               }`}
             >
               {tab.icon}

@@ -127,13 +127,13 @@ export default function ElectricalLighting() {
         
         {/* ─── SWITCHER BUTTONS ─── */}
         <div className="flex justify-center mb-12">
-          <div className="bg-white border border-slate-200/60 p-1.5 rounded-full flex shadow-sm">
+          <div className="glass-premium p-1.5 rounded-full flex shadow-sm border border-slate-200/50">
             <button
               onClick={() => setActiveSection('electrical')}
               className={`flex items-center gap-2 px-6 py-3 rounded-full text-xs font-bold transition-smooth ${
                 activeSection === 'electrical'
-                  ? 'bg-forest text-white shadow-md'
-                  : 'text-slate-600 hover:text-forest'
+                  ? 'bg-forest text-white shadow-md shadow-forest/15 scale-[1.01]'
+                  : 'text-slate-655 hover:text-forest'
               }`}
             >
               <Zap className="w-4 h-4" />
@@ -143,8 +143,8 @@ export default function ElectricalLighting() {
               onClick={() => setActiveSection('lighting')}
               className={`flex items-center gap-2 px-6 py-3 rounded-full text-xs font-bold transition-smooth ${
                 activeSection === 'lighting'
-                  ? 'bg-wood text-white shadow-md'
-                  : 'text-slate-600 hover:text-wood'
+                  ? 'bg-wood text-white shadow-md shadow-wood/15 scale-[1.01]'
+                  : 'text-slate-655 hover:text-wood'
               }`}
             >
               <Sun className="w-4 h-4" />

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, MessageSquare, Phone, Award, Users, CheckCircle, ShieldCheck, ChevronRight, ChevronLeft, Sparkles, MapPin, Mail, Clock, ExternalLink } from 'lucide-react';
 import { categoryService, designService } from '../services/api';
 import { TEL_LINK, WA_GENERAL_LINK, buildWALink, PHONE_DISPLAY } from '../constants';
-import ThreeDViewerModal from '../components/ThreeDViewerModal';
+import FourDVisionModal from '../components/FourDVisionModal';
 
 // Lazy load 3D component to avoid blocking initial render
 const InteriorShowcase3D = lazy(() => import('../components/InteriorShowcase3D'));
@@ -56,9 +56,27 @@ export default function Home() {
   ];
 
   const slides = [
-    '/slide1.png',
-    '/slide2.png',
-    '/slide3.png'
+    {
+      image: '/slide1.png',
+      title_en: 'Crafting Premium Luxury Interiors',
+      title_te: 'అత్యుత్తమ లగ్జరీ ఇంటీరియర్స్',
+      sub_en: 'Custom woodwork, false ceilings, and premium modular kitchens designed for elegant living.',
+      sub_te: 'అందమైన జీవనం కోసం అనుకూలీకరించిన చెక్క పనులు, ఫాల్స్ సీలింగ్స్ మరియు మాడ్యులర్ వంటశాలలు.'
+    },
+    {
+      image: '/slide2.png',
+      title_en: 'Advanced Electrical & Safety Wiring',
+      title_te: 'అధునిక ఎలక్ట్రికల్ & వైరింగ్ వ్యవస్థ',
+      sub_en: 'Fire-resistant conduits, proper phase load-balancing, and safety compliance for complete peace of mind.',
+      sub_te: 'అగ్ని నిరోధక వైరింగ్, సరైన లోడ్ సర్దుబాటు మరియు భద్రతా ప్రమాణాలతో పూర్తి సురక్షితమైన వైరింగ్.'
+    },
+    {
+      image: '/slide3.png',
+      title_en: 'Architectural Accent & Smart Lighting',
+      title_te: 'అద్భుతమైన స్మార్ట్ లైటింగ్ అమరికలు',
+      sub_en: 'Atmospheric cove layouts, app-controlled automation, and landscape garden illuminations.',
+      sub_te: 'వాతావరణానికి తగిన కోవ్ డిజైన్లు, మొబైల్ యాప్ ద్వారా నియంత్రించే లైట్లు మరియు గార్డెన్ వెలుతురు.'
+    }
   ];
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -80,10 +98,12 @@ export default function Home() {
   const [is3DOpen, setIs3DOpen] = useState(false);
   const [selected3DImage, setSelected3DImage] = useState('');
   const [selected3DTitle, setSelected3DTitle] = useState('');
+  const [selected3DDepthMap, setSelected3DDepthMap] = useState('');
 
   const handleOpen3D = (design) => {
     setSelected3DImage(design.images[0]);
     setSelected3DTitle(i18n.language === 'te' ? design.title_te : design.title_en);
+    setSelected3DDepthMap(design.depthMap || '');
     setIs3DOpen(true);
   };
 
@@ -128,17 +148,18 @@ export default function Home() {
         {/* Background image slider */}
         <div 
           onClick={() => {
-            setSelected3DImage(slides[currentSlide]);
-            setSelected3DTitle(`Premium Interior Design ${currentSlide + 1}`);
+            setSelected3DImage(slides[currentSlide].image);
+            setSelected3DTitle(i18n.language === 'te' ? slides[currentSlide].title_te : slides[currentSlide].title_en);
+            setSelected3DDepthMap('');
             setIs3DOpen(true);
           }}
           className="absolute inset-0 z-0 cursor-pointer"
-          title="Click to view in 3D Vision"
+          title="Click to view in 4D Vision"
         >
           <AnimatePresence mode="wait">
             <motion.img
               key={currentSlide}
-              src={slides[currentSlide]}
+              src={slides[currentSlide].image}
               alt="Background Interior Design"
               initial={{ opacity: 0, scale: 1.05 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -161,7 +182,7 @@ export default function Home() {
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24 flex flex-col items-center text-center w-full z-10">
           {/* Hero Text */}
           <motion.div
-            className="space-y-7 text-white flex flex-col items-center"
+            className="space-y-7 text-white flex flex-col items-center w-full"
             initial="hidden"
             animate="visible"
             variants={staggerContainer}
@@ -169,26 +190,29 @@ export default function Home() {
             <motion.span
               variants={fadeUp}
               custom={0}
-              className="inline-block bg-white/15 border border-white/30 text-white text-xs tracking-widest font-extrabold uppercase px-3.5 py-1.5 rounded-full shadow-md"
+              className="inline-block bg-white/10 border border-white/20 text-white text-xs tracking-widest font-extrabold uppercase px-4 py-2 rounded-full shadow-md backdrop-blur-md"
             >
               🇮🇳 All India Interior, Electrical &amp; Lighting Services
             </motion.span>
 
-            <motion.h1
-              variants={fadeUp}
-              custom={1}
-              className="text-4xl sm:text-5xl lg:text-6xl font-outfit font-extrabold tracking-tight leading-tight max-w-3xl drop-shadow-md"
-            >
-              {t('hero.tagline')}
-            </motion.h1>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentSlide}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                className="space-y-5 flex flex-col items-center w-full"
+              >
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-outfit font-extrabold tracking-tight leading-tight max-w-3xl drop-shadow-md">
+                  {i18n.language === 'te' ? slides[currentSlide].title_te : slides[currentSlide].title_en}
+                </h1>
 
-            <motion.p
-              variants={fadeUp}
-              custom={2}
-              className="text-lg text-slate-200 max-w-2xl font-light drop-shadow-sm"
-            >
-              {t('hero.subtagline')}
-            </motion.p>
+                <p className="text-base sm:text-lg text-slate-200 max-w-2xl font-light drop-shadow-sm leading-relaxed px-4">
+                  {i18n.language === 'te' ? slides[currentSlide].sub_te : slides[currentSlide].sub_en}
+                </p>
+              </motion.div>
+            </AnimatePresence>
 
             {/* Dual CTA Buttons */}
             <motion.div
@@ -256,8 +280,9 @@ export default function Home() {
         {/* Floating 3D Vision Button */}
         <button
           onClick={() => {
-            setSelected3DImage(slides[currentSlide]);
-            setSelected3DTitle(`Premium Interior Design ${currentSlide + 1}`);
+            setSelected3DImage(slides[currentSlide].image);
+            setSelected3DTitle(i18n.language === 'te' ? slides[currentSlide].title_te : slides[currentSlide].title_en);
+            setSelected3DDepthMap('');
             setIs3DOpen(true);
           }}
           className="absolute bottom-6 right-6 z-35 flex items-center gap-2 bg-slate-900/80 hover:bg-slate-900 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-smooth shadow-lg backdrop-blur-md border border-white/10 hover:border-forest/50 hover:scale-105 active:scale-95"
@@ -651,9 +676,10 @@ export default function Home() {
         </div>
       </section>
 
-      <ThreeDViewerModal
+      <FourDVisionModal
         isOpen={is3DOpen}
         imageUrl={selected3DImage}
+        depthMapUrl={selected3DDepthMap}
         title={selected3DTitle}
         onClose={() => setIs3DOpen(false)}
       />

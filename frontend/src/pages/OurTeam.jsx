@@ -79,7 +79,7 @@ export default function OurTeam() {
               key={member._id || index}
               variants={fadeUp}
               custom={index}
-              className="bg-white rounded-2xl overflow-hidden shadow-premium shadow-premium-hover border border-slate-100 group flex flex-col"
+              className="glass-premium rounded-2xl overflow-hidden shadow-glow-gold hover:shadow-glow-gold-hover border border-amber-500/5 group flex flex-col transition-all duration-300"
             >
               <div className="aspect-[4/5] bg-slate-50 overflow-hidden relative shrink-0">
                 <img

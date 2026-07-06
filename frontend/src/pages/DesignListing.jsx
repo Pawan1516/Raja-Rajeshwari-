@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, MessageSquare, Phone, AlertCircle, Sparkles } from 'lucide-react';
 import { designService, categoryService } from '../services/api';
 import { TEL_LINK, buildWALink } from '../constants';
-import ThreeDViewerModal from '../components/ThreeDViewerModal';
+import FourDVisionModal from '../components/FourDVisionModal';
 
 const cardVariant = {
   hidden: { opacity: 0, y: 24 },
@@ -26,10 +26,12 @@ export default function DesignListing() {
   const [is3DOpen, setIs3DOpen] = useState(false);
   const [selected3DImage, setSelected3DImage] = useState('');
   const [selected3DTitle, setSelected3DTitle] = useState('');
+  const [selected3DDepthMap, setSelected3DDepthMap] = useState('');
 
   const handleOpen3D = (design) => {
     setSelected3DImage(design.images[0]);
     setSelected3DTitle(i18n.language === 'te' ? design.title_te : design.title_en);
+    setSelected3DDepthMap(design.depthMap || '');
     setIs3DOpen(true);
   };
 
@@ -281,9 +283,10 @@ export default function DesignListing() {
         </div>
       </div>
 
-      <ThreeDViewerModal
+      <FourDVisionModal
         isOpen={is3DOpen}
         imageUrl={selected3DImage}
+        depthMapUrl={selected3DDepthMap}
         title={selected3DTitle}
         onClose={() => setIs3DOpen(false)}
       />

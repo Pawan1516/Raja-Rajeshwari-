@@ -97,8 +97,8 @@ export default function Contact() {
           <div className="lg:col-span-5 space-y-8">
             
             {/* Showroom Details Box */}
-            <div className="bg-white rounded-3xl border border-slate-100 p-8 space-y-6 shadow-premium">
-              <h3 className="font-outfit font-extrabold text-xl text-slate-900 border-b border-slate-100 pb-3">
+            <div className="glass-premium rounded-3xl border border-amber-500/10 p-8 space-y-6 shadow-glow-gold">
+              <h3 className="font-outfit font-extrabold text-xl text-slate-900 border-b border-slate-200/60 pb-3">
                 Raja Rajeshwari Interior Works
               </h3>
               

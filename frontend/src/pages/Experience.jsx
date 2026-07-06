@@ -122,14 +122,14 @@ export default function Experience() {
 
       {/* ─── DEDICATED FOUNDER & OWNER DETAILS SECTION ─── */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-3xl border border-slate-100 shadow-premium p-8 sm:p-12 text-center space-y-8 relative overflow-hidden">
+        <div className="glass-premium rounded-3xl border border-amber-500/10 shadow-glow-gold p-8 sm:p-12 text-center space-y-8 relative overflow-hidden">
           {/* Ambient Glows */}
-          <div className="absolute -top-24 -left-24 w-48 h-48 bg-forest/5 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-wood/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -top-24 -left-24 w-48 h-48 bg-forest/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-wood/10 rounded-full blur-3xl pointer-events-none" />
 
           {/* Title */}
           <div className="space-y-2">
-            <span className="text-xs font-extrabold text-forest uppercase tracking-widest block">
+            <span className="text-xs font-extrabold text-forest uppercase tracking-widest block font-sans">
               Leadership Profile
             </span>
             <h2 className="text-3xl font-outfit font-extrabold text-slate-900">
@@ -140,7 +140,7 @@ export default function Experience() {
 
           {/* Center Owner Photo at the top of content */}
           <div className="relative w-44 h-44 mx-auto group">
-            <div className="w-full h-full rounded-full border-4 border-wood bg-slate-100 flex items-center justify-center shadow-xl overflow-hidden">
+            <div className="w-full h-full rounded-full border-4 border-amber-500/20 ring-4 ring-amber-500/10 ring-offset-4 ring-offset-white bg-slate-100 flex items-center justify-center shadow-2xl overflow-hidden">
               <img 
                 src={founder ? getImageUrl(founder.image) : '/owner.jpg'} 
                 alt={founder ? founder.name : "Rajamouli Chary"} 
