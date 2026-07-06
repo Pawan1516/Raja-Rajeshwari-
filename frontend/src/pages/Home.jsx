@@ -30,6 +30,34 @@ export default function Home() {
   const [categories, setCategories] = useState([]);
   const [featuredDesigns, setFeaturedDesigns] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeFaq, setActiveFaq] = useState(null);
+
+  const faqs = [
+    {
+      q_en: "Do you provide custom dimensions for wardrobes and kitchens?",
+      q_te: "వార్డ్‌రోబ్‌లు మరియు కిచెన్‌లను కస్టమ్ సైజులలో తయారు చేస్తారా?",
+      a_en: "Yes. Every modular kitchen layout, TV unit configuration, and wardrobe is custom fabricated inside our workshop to match your exact room dimensions and layout parameters.",
+      a_te: "అవును. ప్రతి మోడ్యులర్ కిచెన్, టీవీ యూనిట్ మరియు వార్డ్‌రోబ్ మీ గది కొలతలకు సరిగ్గా సరిపోయేలా మా వర్క్‌షాప్‌లోనే అనుకూలీకరించి తయారు చేయబడుతుంది."
+    },
+    {
+      q_en: "What warranty coverage do you offer on services?",
+      q_te: "మీరు అందించే సేవలపై వారంటీ ఎంత ఉంటుంది?",
+      a_en: "We offer a comprehensive 2-year warranty on all carpentry works, custom fabrication joints, and electrical fitting safety installations.",
+      a_te: "మేము అన్ని రకాల చెక్క పనులు, కస్టమ్ ఫిట్టింగ్‌లు మరియు ఎలక్ట్రికల్ ఫిట్టింగ్ భద్రతా ఇన్‌స్టాలేషన్‌లపై 2 సంవత్సరాల పూర్తి వారంటీని అందిస్తాము."
+    },
+    {
+      q_en: "Do you serve areas outside Hyderabad?",
+      q_te: "హైదరాబాద్ వెలుపల ఇతర ప్రాంతాలలో సేవలు అందిస్తారా?",
+      a_en: "Yes. Raja Rajeshwari Interior Works provides comprehensive interior, electrical, and lighting services across all states and major cities in India.",
+      a_te: "అవును. రాజ రాజేశ్వరి ఇంటీరియర్ వర్క్స్ భారతదేశంలోని అన్ని రాష్ట్రాలు మరియు ప్రధాన నగరాల్లో ఇంటీరియర్, ఎలక్ట్రికల్ మరియు లైటింగ్ సేవలను అందిస్తుంది."
+    },
+    {
+      q_en: "How does the 4D AI Vision feature work?",
+      q_te: "4D AI విజన్ ఫీచర్ ఎలా ఉపయోగపడుతుంది?",
+      a_en: "The 4D AI Vision engine converts standard 2D pictures into 3D heightmaps in real-time. This lets you inspect material depths, rotate the view via click-and-drag, and simulate lighting shifts (Day vs. Night).",
+      a_te: "4D AI విజన్ ఇంజిన్ సాధారణ 2D చిత్రాలను నిజ సమయంలో 3D హైట్‌మ్యాప్‌లుగా మారుస్తుంది. దీని ద్వారా మీరు మెటీరియల్స్ లోతును చూడవచ్చు, తిప్పి పరిశీలించవచ్చు మరియు లైటింగ్ మార్పులను (పగలు vs రాత్రి) అనుకరించవచ్చు."
+    }
+  ];
 
   const mainCategories = [
     {
@@ -564,6 +592,134 @@ export default function Home() {
               </motion.div>
             ))}
           </motion.div>
+        </div>
+      </section>
+
+      {/* ─── CLIENT EXPERIENCE: 4-STEP PROCESS ─── */}
+      <section className="py-16 bg-slate-50 border-y border-slate-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-xl mx-auto mb-16">
+            <span className="text-forest text-xs font-extrabold uppercase tracking-widest block mb-2 font-sans">
+              How We Work
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-outfit font-extrabold text-slate-900">
+              {i18n.language === 'te' ? 'మా 4-దశల సేవల ప్రక్రియ' : 'Our 4-Step Seamless Process'}
+            </h2>
+            <div className="w-16 h-1 bg-wood mx-auto mt-3 mb-4"></div>
+            <p className="text-slate-500 text-sm">
+              {i18n.language === 'te'
+                ? 'మీ కలల ఇళ్లను సాకారం చేయడానికి మేము అనుసరించే పారదర్శక విధానం.'
+                : 'A transparent, step-by-step journey from initial consultation to premium warranty handover.'}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
+            {[
+              {
+                icon: <MessageSquare className="w-6 h-6 text-forest" />,
+                title_en: "1. Free Consultation",
+                title_te: "1. ఉచిత సంప్రదింపులు",
+                desc_en: "Connect on WhatsApp or call to discuss dimensions, layout preferences, and custom service estimates.",
+                desc_te: "కొలతలు, గది ఆకృతులు మరియు కావలసిన డిజైన్ల గురించి మాట్లాడటానికి వాట్సాప్ లేదా కాల్ ద్వారా మమ్మల్ని సంప్రదించండి."
+              },
+              {
+                icon: <Sparkles className="w-6 h-6 text-amber-500" />,
+                title_en: "2. 3D Blueprint Layout",
+                title_te: "2. 3D లేఅవుట్ డిజైనింగ్",
+                desc_en: "We create a dynamic 3D blueprint so you can review and customize material heights and placements.",
+                desc_te: "వార్డ్‌రోబ్‌లు, కిచెన్‌ల అమరికను సరిచూసుకోవడానికి మేము కచ్చితమైన 3D లేఅవుట్ డిజైన్‌ను తయారు చేస్తాము."
+              },
+              {
+                icon: <Award className="w-6 h-6 text-wood" />,
+                title_en: "3. Woodwork & Fitting",
+                title_te: "3. కస్టమ్ వుడ్ వర్క్ & వైరింగ్",
+                desc_en: "Our carpenters fabricate premium fittings while electrical teams lay secure concealed conduit piping.",
+                desc_te: "మా వడ్రంగులు నాణ్యమైన వుడ్ వర్క్ చేయగా, ఎలక్ట్రికల్ బృందం సురక్షితమైన వైరింగ్ మరియు కనెక్షన్లు పూర్తి చేస్తుంది."
+              },
+              {
+                icon: <ShieldCheck className="w-6 h-6 text-blue-600" />,
+                title_en: "4. Handover & Warranty",
+                title_te: "4. వారంటీతో అందజేత",
+                desc_en: "Rigorous quality checks, site cleaning, and handover of your project along with a 2-year warranty protection card.",
+                desc_te: "చివరి నాణ్యత తనిఖీలు పూర్తి చేసి, 2 సంవత్సరాల సేవా వారంటీ కార్డ్‌తో మీ ఇళ్లను సగర్వంగా అందజేస్తాము."
+              }
+            ].map((step, idx) => (
+              <motion.div
+                key={idx}
+                className="bg-white rounded-3xl border border-slate-100 p-6 shadow-premium hover:shadow-premium-hover transition-all duration-300 relative group flex flex-col space-y-4"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeUp}
+                custom={idx}
+              >
+                <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center shadow-inner group-hover:scale-105 transition-smooth">
+                  {step.icon}
+                </div>
+                <div className="space-y-2">
+                  <h3 className="font-outfit font-bold text-slate-900 text-lg leading-snug">
+                    {i18n.language === 'te' ? step.title_te : step.title_en}
+                  </h3>
+                  <p className="text-slate-500 text-xs sm:text-sm leading-relaxed font-sans">
+                    {i18n.language === 'te' ? step.desc_te : step.desc_en}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── CLIENT EXPERIENCE: DYNAMIC FAQS ─── */}
+      <section className="py-16 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-xl mx-auto mb-12">
+          <span className="text-forest text-xs font-extrabold uppercase tracking-widest block mb-2 font-sans">
+            Client Assistance
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-outfit font-extrabold text-slate-900">
+            {i18n.language === 'te' ? 'తరచుగా అడిగే ప్రశ్నలు' : 'Frequently Asked Questions'}
+          </h2>
+          <div className="w-16 h-1 bg-wood mx-auto mt-3 mb-4"></div>
+          <p className="text-slate-500 text-sm">
+            {i18n.language === 'te'
+              ? 'మా సేవలు మరియు పనితీరు గురించి కస్టమర్లు సాధారణంగా అడిగే ప్రశ్నల సమాధానాలు.'
+              : 'Quick answers to common questions about our custom services, warranties, and project timelines.'}
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          {faqs.map((faq, idx) => (
+            <div
+              key={idx}
+              className="bg-white rounded-2xl border border-slate-100 shadow-premium overflow-hidden transition-all duration-300"
+            >
+              <button
+                type="button"
+                onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
+                className="w-full flex items-center justify-between p-6 text-left focus:outline-none"
+              >
+                <span className="font-outfit font-bold text-slate-900 text-sm sm:text-base leading-snug">
+                  {i18n.language === 'te' ? faq.q_te : faq.q_en}
+                </span>
+                <ChevronRight className={`w-5 h-5 transition-transform duration-300 shrink-0 ${activeFaq === idx ? 'rotate-90 text-forest' : 'text-slate-400'}`} />
+              </button>
+              
+              <AnimatePresence initial={false}>
+                {activeFaq === idx && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  >
+                    <div className="px-6 pb-6 pt-1 border-t border-slate-50 text-slate-600 text-xs sm:text-sm leading-relaxed font-sans">
+                      {i18n.language === 'te' ? faq.a_te : faq.a_en}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ))}
         </div>
       </section>
 

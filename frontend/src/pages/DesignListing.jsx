@@ -274,6 +274,9 @@ export default function DesignListing() {
                       >
                         {t('common.view_details')} →
                       </Link>
+                      <p className="text-[9px] text-slate-400 text-center mt-1.5 font-sans leading-none">
+                        * Auto-attaches Code: <strong>{design.designId}</strong>
+                      </p>
                     </div>
                   </motion.div>
                 ))}

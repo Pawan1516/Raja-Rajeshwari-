@@ -248,7 +248,9 @@ export default function DesignDetail() {
             </motion.div>
 
             <motion.p variants={fadeUp} custom={5} className="hidden sm:block text-xs text-slate-400 italic">
-              Clicking WhatsApp sends the active design image, code, and details directly to our design engineer.
+              {i18n.language === 'te'
+                ? `* వాట్సాప్ క్లిక్ చేస్తే ఈ డిజైన్ కోడ్ (${design.designId}) మరియు వివరాలు నేరుగా మా డిజైన్ ఇంజనీర్ కు పంపబడతాయి.`
+                : `* Clicking WhatsApp automatically sends the active design image, design code (${design.designId}), and details to our design engineer.`}
             </motion.p>
           </motion.div>
         </div>
@@ -279,8 +281,10 @@ export default function DesignDetail() {
             <span>{t('common.call_now')}</span>
           </a>
         </div>
-        <p className="text-[10px] text-slate-400 text-center mt-1.5">
-          Tap to connect with our design team instantly
+        <p className="text-[10px] text-slate-400 text-center mt-1.5 leading-relaxed">
+          {i18n.language === 'te'
+            ? `* నొక్కితే డిజైన్ కోడ్ ${design.designId} తో చాట్ ఓపెన్ అవుతుంది`
+            : `* Tapping auto-attaches Design Code: ${design.designId}`}
         </p>
       </motion.div>
 
