@@ -105,6 +105,114 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// @route   POST /api/designs/bulk
+// @desc    Bulk create designs (Admin Only)
+// @access  Private (Admin Only)
+router.post('/bulk', auth, upload.array('images', 100), async (req, res) => {
+  const { categoryOverride, subcategoryOverride, titleOverride } = req.body;
+
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ message: 'No images uploaded for bulk processing' });
+  }
+
+  const { analyzeImage } = require('../services/aiService');
+  const results = [];
+
+  try {
+    for (const file of req.files) {
+      // 1. Resolve image url
+      const imageUrl = isCloudinaryConfigured ? file.path : `/uploads/${file.filename}`;
+
+      // 2. Perform AI Vision/Logic analysis
+      const analysis = await analyzeImage(imageUrl, file.originalname);
+
+      // 3. Apply Overrides if provided
+      let finalCategoryName = analysis.category;
+      let finalSubcategory = subcategoryOverride || analysis.subcategory;
+      let finalTitleEn = titleOverride
+        ? `${titleOverride} - ${finalSubcategory}`
+        : analysis.title_en;
+      let finalWorkType = analysis.workType;
+
+      // If manual category override is specified, get it from DB
+      let categoryId;
+      if (categoryOverride && categoryOverride !== 'undefined') {
+        const catDoc = await Category.findById(categoryOverride);
+        if (catDoc) {
+          categoryId = catDoc._id;
+          finalCategoryName = catDoc.name_en;
+          finalWorkType = catDoc.workType;
+        }
+      }
+
+      // If no categoryOverride, look up Category in the database matching detected name_en
+      if (!categoryId) {
+        let catDoc = await Category.findOne({ name_en: new RegExp('^' + finalCategoryName + '$', 'i') });
+        if (!catDoc) {
+          // Fallback to closest match
+          const keyword = finalCategoryName.split(' ')[0]; // E.g. "Living" or "Modular"
+          catDoc = await Category.findOne({ name_en: new RegExp(keyword, 'i') });
+        }
+        if (!catDoc) {
+          // Fallback to "Living Room Interiors" if not found
+          catDoc = await Category.findOne({ name_en: 'Living Room Interiors' });
+        }
+        if (!catDoc) {
+          // Or just any category
+          catDoc = await Category.findOne({});
+        }
+        if (catDoc) {
+          categoryId = catDoc._id;
+          finalCategoryName = catDoc.name_en;
+          finalWorkType = catDoc.workType;
+        }
+      }
+
+      // 4. Translate title to Telugu if titleOverride is set
+      let finalTitleTe;
+      if (titleOverride) {
+        const { translateToTelugu } = require('../services/aiService');
+        finalTitleTe = await translateToTelugu(finalTitleEn);
+      } else {
+        finalTitleTe = analysis.title_te;
+      }
+
+      // 5. Generate features based on category type
+      const finalFeatures = analysis.features && analysis.features.length > 0
+        ? analysis.features
+        : (finalWorkType === 'electrical'
+            ? ['Safe Wiring', 'Load Protection', 'Energy Efficient']
+            : finalWorkType === 'lighting'
+            ? ['LED Lights', 'Ambient Lighting', 'Smart Control']
+            : ['False Ceiling', 'Wooden Paneling', 'Modular Storage']);
+
+      // Create new Design Card
+      const newDesign = new Design({
+        title_en: finalTitleEn,
+        title_te: finalTitleTe,
+        category: categoryId,
+        subcategory: finalSubcategory,
+        images: [imageUrl],
+        features: finalFeatures,
+        description_en: `${finalSubcategory} premium layout setup under ${finalCategoryName}.`,
+        description_te: `${finalCategoryName} కింద ${finalSubcategory} ప్రీమియం లేఅవుట్ సెటప్.`,
+        workType: finalWorkType,
+      });
+
+      await newDesign.save();
+
+      // Populate and add to results
+      const populated = await Design.findById(newDesign._id).populate('category', 'name_en name_te');
+      results.push(populated);
+    }
+
+    res.status(201).json(results);
+  } catch (error) {
+    console.error('Error during bulk upload:', error);
+    res.status(500).json({ message: 'Server error processing bulk upload', error: error.message });
+  }
+});
+
 // @route   POST /api/designs
 // @desc    Create a new design (Admin Only, Multi-image)
 // @access  Private (Admin Only)

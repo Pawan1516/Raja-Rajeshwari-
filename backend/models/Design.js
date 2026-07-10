@@ -41,6 +41,14 @@ const DesignSchema = new mongoose.Schema({
     enum: ['interior', 'electrical', 'lighting'],
     default: 'interior',
   },
+  subcategory: {
+    type: String,
+    default: '',
+  },
+  features: {
+    type: [String],
+    default: [],
+  },
 }, { timestamps: true });
 
 // Pre-save hook to auto-generate sequential designId (e.g. RLIW-1001)

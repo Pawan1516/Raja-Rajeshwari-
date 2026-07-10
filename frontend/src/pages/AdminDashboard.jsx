@@ -109,6 +109,79 @@ export default function AdminDashboard() {
     }
   };
 
+  // Bulk Upload States
+  const [showBulkUploadForm, setShowBulkUploadForm] = useState(false);
+  const [bulkFiles, setBulkFiles] = useState([]);
+  const [bulkCategoryOverride, setBulkCategoryOverride] = useState('');
+  const [bulkSubcategoryOverride, setBulkSubcategoryOverride] = useState('');
+  const [bulkTitleOverride, setBulkTitleOverride] = useState('');
+  const [bulkUploadProgress, setBulkUploadProgress] = useState(0);
+  const [bulkQueueStatus, setBulkQueueStatus] = useState([]);
+  const [bulkProcessedResults, setBulkProcessedResults] = useState([]);
+
+  const handleBulkCancel = () => {
+    setShowBulkUploadForm(false);
+    setBulkFiles([]);
+    setBulkCategoryOverride('');
+    setBulkSubcategoryOverride('');
+    setBulkTitleOverride('');
+    setBulkUploadProgress(0);
+    setBulkQueueStatus([]);
+    setBulkProcessedResults([]);
+  };
+
+  const handleBulkSubmit = async (e) => {
+    e.preventDefault();
+    if (bulkFiles.length === 0) {
+      setFeedback({ type: 'error', message: 'Please select at least one image file.' });
+      return;
+    }
+
+    setActionLoading(true);
+    setFeedback({ type: '', message: '' });
+    setBulkUploadProgress(5);
+
+    const initialQueue = bulkFiles.map(f => ({
+      filename: f.name,
+      status: 'pending'
+    }));
+    setBulkQueueStatus(initialQueue);
+
+    const formData = new FormData();
+    formData.append('categoryOverride', bulkCategoryOverride);
+    formData.append('subcategoryOverride', bulkSubcategoryOverride);
+    formData.append('titleOverride', bulkTitleOverride);
+    
+    bulkFiles.forEach(file => {
+      formData.append('images', file);
+    });
+
+    try {
+      setBulkQueueStatus(prev => prev.map(item => ({ ...item, status: 'uploading' })));
+      setBulkUploadProgress(25);
+
+      const response = await designService.bulkCreate(formData, (progressEvent) => {
+        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        setBulkUploadProgress(Math.min(85, Math.max(25, Math.round(percentCompleted * 0.85))));
+      });
+
+      setBulkQueueStatus(prev => prev.map(item => ({ ...item, status: 'completed' })));
+      setBulkUploadProgress(100);
+      setBulkProcessedResults(response);
+      setFeedback({ 
+        type: 'success', 
+        message: `Successfully uploaded and auto-processed ${response.length} design cards!` 
+      });
+      loadData();
+    } catch (err) {
+      console.error(err);
+      setBulkQueueStatus(prev => prev.map(item => ({ ...item, status: 'error', error: err.message || 'Failed' })));
+      setFeedback({ type: 'error', message: err.response?.data?.message || err.message || 'Bulk upload failed.' });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   // Category Form States
   const [catNameEn, setCatNameEn] = useState('');
   const [catNameTe, setCatNameTe] = useState('');
@@ -482,6 +555,20 @@ export default function AdminDashboard() {
             <Plus className="w-4 h-4 text-forest" />
             <span>Add Team Member</span>
           </button>
+
+          <button
+            onClick={() => {
+              handleBulkCancel();
+              setShowBulkUploadForm(true);
+              setShowDesignForm(false);
+              setShowCategoryForm(false);
+              setShowTeamForm(false);
+            }}
+            className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-md shadow-amber-500/15 active:scale-95"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>AI Bulk Upload</span>
+          </button>
           
           <button
             onClick={() => {
@@ -777,6 +864,204 @@ export default function AdminDashboard() {
                     {actionLoading ? <Loader className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-4 h-4" />}
                     <span>Save Team Member</span>
                   </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* AI Bulk Upload Modal */}
+      <AnimatePresence>
+        {showBulkUploadForm && (
+          <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              className="bg-white rounded-3xl border border-slate-100 shadow-2xl max-w-2xl w-full p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto"
+            >
+              <div className="flex items-center justify-between border-b border-slate-150 pb-4 mb-5">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-amber-500 animate-pulse" />
+                  <h2 className="font-outfit font-extrabold text-lg text-slate-900">
+                    AI Automated Bulk Upload System
+                  </h2>
+                </div>
+                <button onClick={handleBulkCancel} className="text-slate-400 hover:text-slate-655 p-1 rounded-lg hover:bg-slate-50 transition-all">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleBulkSubmit} className="space-y-6">
+                {/* Image Files Uploader */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-600 block">Select Images to Bulk Process (50-100 files)</label>
+                  <label className="cursor-pointer border-2 border-dashed border-slate-200 hover:border-amber-400 hover:bg-amber-50/20 rounded-2xl px-4 py-8 text-center text-slate-550 text-xs flex flex-col items-center gap-2.5 w-full bg-slate-50/30 transition-all">
+                    <Upload className="w-7 h-7 text-amber-400" />
+                    <span className="font-semibold text-slate-700 text-sm">Drag & Drop or Choose Image Files</span>
+                    <span className="text-[10px] text-slate-455">Supports JPG, PNG, WEBP files up to 20MB each</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => setBulkFiles(Array.from(e.target.files))}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+
+                {/* Selected Files count and list snippet */}
+                {bulkFiles.length > 0 && (
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                    <div className="flex justify-between items-center text-xs font-bold text-slate-800">
+                      <span>Selected Files ({bulkFiles.length}):</span>
+                      <button 
+                        type="button" 
+                        onClick={() => setBulkFiles([])}
+                        className="text-rose-600 hover:underline text-xs"
+                      >
+                        Clear All
+                      </button>
+                    </div>
+                    <div className="max-h-28 overflow-y-auto divide-y divide-slate-100 text-[11px] text-slate-600 pr-2">
+                      {bulkFiles.map((file, idx) => (
+                        <div key={idx} className="py-1.5 flex justify-between">
+                          <span className="truncate max-w-[24rem] font-medium text-slate-750">{file.name}</span>
+                          <span className="text-slate-400 shrink-0 font-mono">{(file.size / 1024).toFixed(0)} KB</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Optional Override Fields */}
+                <div className="bg-amber-50/20 border border-amber-500/10 p-5 rounded-2xl space-y-4">
+                  <span className="text-xs font-extrabold text-amber-600 uppercase tracking-widest block">
+                    Manual Override Config (Optional)
+                  </span>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-slate-600">Force Category (Overrides AI)</label>
+                      <select
+                        value={bulkCategoryOverride}
+                        onChange={(e) => setBulkCategoryOverride(e.target.value)}
+                        className="w-full bg-white text-slate-850 text-xs px-3.5 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-amber-500 transition-smooth"
+                      >
+                        <option value="">-- Let AI Detect Category --</option>
+                        {categories.map((cat) => (
+                          <option key={cat._id} value={cat._id}>
+                            {cat.name_en} ({cat.workType})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-slate-600">Force Subcategory (Optional)</label>
+                      <input
+                        type="text"
+                        value={bulkSubcategoryOverride}
+                        onChange={(e) => setBulkSubcategoryOverride(e.target.value)}
+                        placeholder="e.g. Master Bedroom, L-Shaped Kitchen"
+                        className="w-full bg-white text-slate-850 text-xs px-3.5 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-amber-500 transition-smooth"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-600">Custom Title Prefix / Override (Optional)</label>
+                    <input
+                      type="text"
+                      value={bulkTitleOverride}
+                      onChange={(e) => setBulkTitleOverride(e.target.value)}
+                      placeholder="e.g. Premium Villa Suite (Subcategory will be appended)"
+                      className="w-full bg-white text-slate-850 text-xs px-3.5 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-amber-500 transition-smooth"
+                    />
+                  </div>
+                </div>
+
+                {/* Progress and Processing Queue Tracker */}
+                {bulkUploadProgress > 0 && (
+                  <div className="space-y-3 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                    <div className="flex justify-between items-center text-xs font-bold">
+                      <span className="text-slate-855 flex items-center gap-1.5">
+                        <Loader className="w-3.5 h-3.5 animate-spin text-amber-500" />
+                        Processing Upload Queue...
+                      </span>
+                      <span className="text-amber-600">{bulkUploadProgress}%</span>
+                    </div>
+                    {/* Progress Bar */}
+                    <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                      <div 
+                        className="bg-amber-500 h-full transition-all duration-300"
+                        style={{ width: `${bulkUploadProgress}%` }}
+                      ></div>
+                    </div>
+
+                    {/* Simple status line */}
+                    <p className="text-[11px] text-slate-550 font-medium italic">
+                      {bulkUploadProgress < 35 
+                        ? 'Compressing & uploading images to cloud...'
+                        : bulkUploadProgress < 90
+                        ? 'AI analyzing design layout, generating premium titles and auto-translating to Telugu...'
+                        : 'Saving design cards and updating portfolio database...'}
+                    </p>
+                  </div>
+                )}
+
+                {/* Newly Processed Designs Previews Grid */}
+                {bulkProcessedResults.length > 0 && (
+                  <div className="space-y-3">
+                    <span className="text-xs font-bold text-emerald-600 flex items-center gap-1.5">
+                      <Check className="w-4 h-4 text-emerald-500" />
+                      Generated Design Cards ({bulkProcessedResults.length}):
+                    </span>
+                    <div className="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto pr-2">
+                      {bulkProcessedResults.map((design, idx) => (
+                        <div key={idx} className="bg-slate-50 border border-slate-100 rounded-xl p-3 flex gap-3 items-center shadow-sm">
+                          <img 
+                            src={design.images?.[0]} 
+                            alt="Preview" 
+                            className="w-12 h-10 object-cover rounded-lg bg-slate-200 shrink-0" 
+                          />
+                          <div className="min-w-0 flex-grow space-y-0.5">
+                            <div className="flex justify-between text-[9px] font-extrabold text-slate-400">
+                              <span>{design.designId}</span>
+                              <span className="text-amber-500 truncate max-w-[6rem]">{design.category?.name_en || 'Category'}</span>
+                            </div>
+                            <h4 className="text-[10px] font-bold text-slate-800 truncate">{design.title_en}</h4>
+                            <p className="text-[9px] text-slate-500 truncate italic">{design.subcategory}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Footer Buttons */}
+                <div className="flex justify-end gap-3 pt-5 border-t border-slate-150">
+                  <button
+                    type="button"
+                    onClick={handleBulkCancel}
+                    className="bg-transparent border border-slate-200 hover:bg-slate-50 text-slate-655 px-5 py-2.5 rounded-xl text-xs font-bold transition-smooth"
+                    disabled={actionLoading}
+                  >
+                    Close
+                  </button>
+                  
+                  {bulkProcessedResults.length === 0 && (
+                    <button
+                      type="submit"
+                      disabled={actionLoading || bulkFiles.length === 0}
+                      className="bg-amber-500 hover:bg-amber-600 disabled:opacity-55 text-white px-6 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-smooth hover:scale-[1.02] active:scale-95"
+                    >
+                      {actionLoading ? <Loader className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                      <span>Start Automated Processing</span>
+                    </button>
+                  )}
                 </div>
               </form>
             </motion.div>

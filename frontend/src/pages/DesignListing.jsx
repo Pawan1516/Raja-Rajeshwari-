@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, MessageSquare, Phone, AlertCircle, Sparkles } from 'lucide-react';
+import { Search, Filter, MessageSquare, Phone, AlertCircle, Sparkles, X } from 'lucide-react';
+
+const InteriorShowcase3D = lazy(() => import('../components/InteriorShowcase3D'));
 import { designService, categoryService } from '../services/api';
 import { TEL_LINK, buildWALink } from '../constants';
 
@@ -22,6 +24,11 @@ export default function DesignListing() {
   const [designs, setDesigns] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // 3D Vision Modal States
+  const [selected3DImage, setSelected3DImage] = useState('');
+  const [selected3DTitle, setSelected3DTitle] = useState('');
+  const [is3DOpen, setIs3DOpen] = useState(false);
 
 
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
@@ -156,42 +163,73 @@ export default function DesignListing() {
 
       <div className="p-5 flex flex-col flex-grow justify-between">
         <div className="space-y-1">
-          <span className="text-[10px] font-bold text-wood-light uppercase tracking-wider block">
+          <span className="text-[9px] font-bold text-wood-light uppercase tracking-wider block truncate">
             {design.category ? getLocalizedName(design.category) : ''}
+            {design.subcategory && ` / ${design.subcategory}`}
           </span>
           <h3 className="font-outfit font-bold text-slate-900 text-sm leading-snug group-hover:text-forest transition-smooth line-clamp-1">
             {getLocalizedTitle(design)}
           </h3>
+          {design.features && design.features.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1.5 mb-1">
+              {design.features.slice(0, 3).map((feat, idx) => (
+                <span 
+                  key={idx} 
+                  className="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-50 text-slate-500 border border-slate-100 font-sans"
+                >
+                  {feat}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Dual CTA Buttons */}
-        <div className="pt-4 mt-4 border-t border-slate-100 grid grid-cols-2 gap-2">
-          <a
-            href={getWhatsAppLink(design)}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center justify-center gap-1.5 bg-whatsapp hover:bg-whatsappdark text-white py-2 rounded-xl text-[11px] font-bold transition-smooth"
-          >
-            <MessageSquare className="w-3.5 h-3.5" />
-            <span>WhatsApp</span>
-          </a>
-          <a
-            href={TEL_LINK}
-            className="flex items-center justify-center gap-1.5 bg-forest hover:bg-forest-dark text-white py-2 rounded-xl text-[11px] font-bold transition-smooth shadow-call-glow"
-          >
-            <Phone className="w-3.5 h-3.5" />
-            <span>{t('common.call_now')}</span>
-          </a>
+        {/* Four CTA Buttons Grid */}
+        <div className="pt-4 mt-4 border-t border-slate-100 space-y-2">
+          {/* Row 1: WhatsApp & Call Now */}
+          <div className="grid grid-cols-2 gap-2">
+            <a
+              href={getWhatsAppLink(design)}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-center gap-1.5 bg-whatsapp hover:bg-whatsappdark text-white py-2 rounded-xl text-[10px] sm:text-[11px] font-bold transition-smooth"
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>WhatsApp</span>
+            </a>
+            <a
+              href={TEL_LINK}
+              className="flex items-center justify-center gap-1.5 bg-forest hover:bg-forest-dark text-white py-2 rounded-xl text-[10px] sm:text-[11px] font-bold transition-smooth shadow-call-glow"
+            >
+              <Phone className="w-3.5 h-3.5" />
+              <span>{t('common.call_now')}</span>
+            </a>
+          </div>
+
+          {/* Row 2: View Details & View in 3D Vision */}
+          <div className="grid grid-cols-2 gap-2">
+            <Link
+              to={`/designs/${design.designId}`}
+              className="flex items-center justify-center border border-slate-200 hover:bg-slate-50 text-slate-600 py-2 rounded-xl text-[10px] sm:text-[11px] font-bold transition-smooth text-center"
+            >
+              <span>{t('common.view_details')}</span>
+            </Link>
+            <button
+              onClick={() => {
+                setSelected3DImage(design.images?.[0] || '');
+                setSelected3DTitle(getLocalizedTitle(design));
+                setIs3DOpen(true);
+              }}
+              className="flex items-center justify-center gap-1.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white py-2 rounded-xl text-[10px] sm:text-[11px] font-bold transition-smooth shadow-md shadow-amber-500/10 active:scale-95"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>3D Vision</span>
+            </button>
+          </div>
         </div>
 
-        <Link
-          to={`/designs/${design.designId}`}
-          className="mt-2.5 text-[11px] font-bold text-slate-500 hover:text-forest transition-smooth text-center block"
-        >
-          {t('common.view_details')} →
-        </Link>
-        <p className="text-[9px] text-slate-400 text-center mt-1.5 font-sans leading-none">
-          * Auto-attaches Code: <strong>{design.designId}</strong>
+        <p className="text-[8px] text-slate-400 text-center mt-2 font-sans leading-none">
+          Code: <strong>{design.designId}</strong>
         </p>
       </div>
     </motion.div>
@@ -396,6 +434,82 @@ export default function DesignListing() {
           )}
         </div>
       </div>
+
+      {/* ─── 3D VISION SHOWCASE MODAL ─── */}
+      <AnimatePresence>
+        {is3DOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 180 }}
+              className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh]"
+            >
+              {/* Modal Header */}
+              <div className="p-6 border-b border-slate-800 flex items-center justify-between shrink-0">
+                <div>
+                  <span className="text-[10px] bg-forest/80 text-forest-light px-2.5 py-1 rounded-md font-bold uppercase tracking-wider block w-fit mb-1.5 font-sans">
+                    Interactive 3D Preview
+                  </span>
+                  <h3 className="text-white font-outfit font-extrabold text-xl">
+                    {selected3DTitle || 'Interior Showroom in 3D'}
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIs3DOpen(false)}
+                  className="p-2 rounded-full bg-slate-850 text-slate-400 hover:text-white hover:bg-slate-805 transition duration-300"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Modal 3D Canvas Body */}
+              <div className="flex-grow p-4 md:p-6 min-h-[350px] md:min-h-[450px] flex items-center justify-center bg-slate-950 relative">
+                <Suspense fallback={
+                  <div className="flex flex-col items-center justify-center gap-3 text-slate-400">
+                    <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-xs font-semibold font-sans">Initializing 3D Environment...</span>
+                  </div>
+                }>
+                  <InteriorShowcase3D />
+                </Suspense>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-5 border-t border-slate-800 bg-slate-900/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shrink-0 text-xs text-slate-400">
+                <p className="leading-relaxed font-sans">
+                  💡 Use your mouse or touch swipe to rotate the showroom. Pinch to zoom in/out.
+                </p>
+                <div className="flex gap-3">
+                  <a
+                    href={`https://wa.me/919989704779?text=I'm interested in design: ${encodeURIComponent(selected3DTitle)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1.5 bg-whatsapp hover:bg-whatsappdark text-white px-4 py-2 rounded-xl font-bold transition-smooth font-sans text-xs"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    <span>WhatsApp Quote</span>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setIs3DOpen(false)}
+                    className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl font-bold transition-smooth font-sans text-xs"
+                  >
+                    Close Preview
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

@@ -330,6 +330,46 @@ api.interceptors.response.use(
             }
           };
         }
+      } else if (method === 'post' && url.includes('/designs/bulk')) {
+        const categoryOverride = config.data.get('categoryOverride');
+        const subcategoryOverride = config.data.get('subcategoryOverride') || '';
+        const titleOverride = config.data.get('titleOverride') || '';
+        
+        const files = config.data.getAll('images');
+        const createdDesigns = [];
+        
+        files.forEach((file, idx) => {
+          const index = mockDesigns.length + 1;
+          const detectedCategory = mockCategories.find(c => c._id === categoryOverride) || mockCategories[idx % mockCategories.length];
+          const subcat = subcategoryOverride || (detectedCategory.name_en.replace(' Interiors', '').replace(' Designs', '').replace(' Lighting', '') + ' Unit');
+          const title = titleOverride 
+            ? `${titleOverride} - ${subcat}` 
+            : `Modern ${subcat} Setup`;
+            
+          const mockNewDesign = {
+            _id: `design_${Date.now()}_${idx}`,
+            designId: `RLIW-${1000 + index}`,
+            title_en: title,
+            title_te: `ఆధునిక ${subcat} సెటప్`,
+            category: detectedCategory,
+            subcategory: subcat,
+            images: [
+              "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80"
+            ],
+            features: detectedCategory.workType === 'electrical' 
+              ? ["Safe Wiring", "Load Protection", "Energy Efficient"]
+              : detectedCategory.workType === 'lighting'
+              ? ["LED Lights", "Ambient Lighting", "Smart Control"]
+              : ["False Ceiling", "Wooden Paneling", "Modular Storage"],
+            description_en: `${subcat} premium layout setup.`,
+            description_te: `${subcat} ప్రీమియం లేఅవుట్ సెటప్.`,
+            workType: detectedCategory.workType || 'interior',
+            createdAt: new Date().toISOString()
+          };
+          mockDesigns.push(mockNewDesign);
+          createdDesigns.push(mockNewDesign);
+        });
+        return { data: createdDesigns };
       } else if (method === 'post' && url.includes('/designs')) {
         // Simulate creating designs in offline mode
         const mockNewDesign = {
@@ -544,6 +584,15 @@ export const designService = {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+    });
+    return response.data;
+  },
+  bulkCreate: async (formData, onUploadProgress) => {
+    const response = await api.post('/designs/bulk', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      onUploadProgress,
     });
     return response.data;
   },
