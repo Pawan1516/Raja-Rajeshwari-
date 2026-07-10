@@ -6,83 +6,83 @@ const API_BASE_URL = API_URL;
 
 // Mock Data for Offline Demo Mode
 const mockCategories = [
-  {
-    _id: "cat_living_room",
-    name_en: 'Living Room Design',
-    name_te: 'లివింగ్ రూమ్ డిజైన్',
-    image: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80',
-    workType: 'interior'
-  },
-  {
-    _id: "cat_modular_kitchen",
-    name_en: 'Modular Kitchen',
-    name_te: 'మోడ్యులర్ కిచెన్',
-    image: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=800&q=80',
-    workType: 'interior'
-  },
-  {
-    _id: "cat_bedroom",
-    name_en: 'Bedroom Interior',
-    name_te: 'బెడ్‌రూమ్ ఇంటీరియర్',
-    image: 'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=800&q=80',
-    workType: 'interior'
-  },
-  {
-    _id: "cat_dining_room",
-    name_en: 'Dining Room Design',
-    name_te: 'డైనింగ్ రూమ్ డిజైన్',
-    image: 'https://images.unsplash.com/photo-1617806118233-18e1db207f62?auto=format&fit=crop&w=800&q=80',
-    workType: 'interior'
-  },
-  {
-    _id: "cat_tv_unit",
-    name_en: 'TV Unit Design',
-    name_te: 'టీవీ యూనిట్ డిజైన్',
-    image: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=800&q=80',
-    workType: 'interior'
-  },
-  {
-    _id: "cat_false_ceiling",
-    name_en: 'False Ceiling Design',
-    name_te: 'ఫాల్స్ సీలింగ్ డిజైన్',
-    image: 'https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=800&q=80',
-    workType: 'interior'
-  },
-  {
-    _id: "cat_lighting_design",
-    name_en: 'Lighting Design',
-    name_te: 'లైటింగ్ డిజైన్',
-    image: 'https://images.unsplash.com/photo-1565814636199-ae8133055c1c?auto=format&fit=crop&w=800&q=80',
-    workType: 'lighting'
-  },
-  {
-    _id: "cat_wall_decor",
-    name_en: 'Wall Decor & Paneling',
-    name_te: 'వాల్ డెకర్ & ప్యానెలింగ్',
-    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80',
-    workType: 'interior'
-  },
-  {
-    _id: "cat_wiring",
-    name_en: 'Complete House Wiring',
-    name_te: 'పూర్తి హౌస్ వైరింగ్',
-    image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=800&q=80',
-    workType: 'electrical'
-  },
-  {
-    _id: "cat_automation",
-    name_en: 'Smart Home Automation',
-    name_te: 'స్మార్ట్ హోమ్ ఆటోమేషన్',
-    image: 'https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=800&q=80',
-    workType: 'electrical'
-  },
-  {
-    _id: "cat_chandeliers",
-    name_en: 'Chandeliers',
-    name_te: 'ఝూమర్లు (చాండెలియర్స్)',
-    image: 'https://images.unsplash.com/photo-1520699049698-acd2fccb8cc8?auto=format&fit=crop&w=800&q=80',
-    workType: 'lighting'
-  }
+  // ─── 1. Interior Works ───────────────────────────────────────────────────────
+  // Living Room — luxury sofa, TV wall, LED
+  { _id: "cat_living_room", name_en: "Living Room Interiors", name_te: "లివింగ్ రూమ్ ఇంటీరియర్స్", image: "https://cdn.pixabay.com/photo/2017/09/09/18/25/living-room-2732939_1280.jpg", workType: 'interior' },
+  // Modular Kitchen — white cabinets island
+  { _id: "cat_modular_kitchen", name_en: "Modular Kitchen Interiors", name_te: "మోడ్యులర్ కిచెన్ ఇంటీరియర్స్", image: "https://cdn.pixabay.com/photo/2016/11/18/17/20/kitchen-1837150_1280.jpg", workType: 'interior' },
+  // Bedroom — king bed wooden wall panel
+  { _id: "cat_bedroom", name_en: "Bedroom Interiors", name_te: "బెడ్‌రూమ్ ఇంటీరియర్స్", image: "https://cdn.pixabay.com/photo/2017/03/28/12/10/chairs-2181979_1280.jpg", workType: 'interior' },
+  // Dining Room — pendant lights wooden flooring
+  { _id: "cat_dining_room", name_en: "Dining Room Interiors", name_te: "డైనింగ్ రూమ్ ఇంటీరియర్స్", image: "https://cdn.pixabay.com/photo/2016/11/19/13/06/bed-1839564_1280.jpg", workType: 'interior' },
+  // False Ceiling — cove LED strip gypsum
+  { _id: "cat_false_ceiling", name_en: "False Ceiling Designs", name_te: "ఫాల్స్ సీలింగ్ డిజైన్లు", image: "https://cdn.pixabay.com/photo/2018/01/21/08/00/interior-3096218_1280.jpg", workType: 'interior' },
+  // TV Unit — floating panel LED shelves
+  { _id: "cat_tv_unit", name_en: "TV Unit Designs", name_te: "టీవీ యూనిట్ డిజైన్లు", image: "https://cdn.pixabay.com/photo/2020/10/18/09/16/interior-5664413_1280.jpg", workType: 'interior' },
+  // Wardrobe — sliding mirror modular
+  { _id: "cat_wardrobe", name_en: "Wardrobe Designs", name_te: "వార్డ్‌రోబ్ డిజైన్లు", image: "https://cdn.pixabay.com/photo/2021/01/09/09/30/bedroom-5900878_1280.jpg", workType: 'interior' },
+  // Office Interiors — workstations modern
+  { _id: "cat_office_interior", name_en: "Office Interiors", name_te: "ఆఫీస్ ఇంటీరియర్స్", image: "https://cdn.pixabay.com/photo/2017/07/31/11/21/people-2557396_1280.jpg", workType: 'interior' },
+  // Commercial — showroom display shelves
+  { _id: "cat_commercial_interior", name_en: "Commercial Interiors", name_te: "కమర్షియల్ ఇంటీరియర్స్", image: "https://cdn.pixabay.com/photo/2017/08/07/09/03/coffee-2600765_1280.jpg", workType: 'interior' },
+  // Restaurant & Café — cozy modern café
+  { _id: "cat_restaurant_cafe", name_en: "Restaurant & Café Interiors", name_te: "రెస్టారెంట్ & కేఫ్ ఇంటీరియర్స్", image: "https://cdn.pixabay.com/photo/2016/11/29/09/16/architecture-1868667_1280.jpg", workType: 'interior' },
+  // Pooja Room — wooden marble mandir
+  { _id: "cat_pooja_room", name_en: "Pooja Room Interiors", name_te: "పూజా రూమ్ ఇంటీరియర్స్", image: "https://cdn.pixabay.com/photo/2020/04/09/09/07/hinduism-5020896_1280.jpg", workType: 'interior' },
+  // Bathroom — marble vanity mirror luxury
+  { _id: "cat_bathroom", name_en: "Bathroom Interiors", name_te: "బాత్‌రూమ్ ఇంటీరియర్స్", image: "https://cdn.pixabay.com/photo/2020/10/22/15/42/bathroom-5675254_1280.jpg", workType: 'interior' },
+
+  // ─── 2. Electrical Works ─────────────────────────────────────────────────────
+  // Residential Wiring — electrician switchboard
+  { _id: "cat_wiring", name_en: "Residential Electrical Wiring", name_te: "నివాస విద్యుత్ వైరింగ్", image: "https://cdn.pixabay.com/photo/2016/11/29/01/36/home-1866375_1280.jpg", workType: 'electrical' },
+  // Commercial Electrical — panel wiring office
+  { _id: "cat_commercial_electrical", name_en: "Commercial Electrical Installation", name_te: "వాణిజ్య విద్యుత్ సంస్థాపన", image: "https://cdn.pixabay.com/photo/2020/02/07/10/01/electricity-4826344_1280.jpg", workType: 'electrical' },
+  // Industrial — control panel equipment
+  { _id: "cat_industrial_electrical", name_en: "Industrial Electrical Works", name_te: "పారిశ్రామిక విద్యుత్ పనులు", image: "https://cdn.pixabay.com/photo/2015/09/18/12/30/electric-946073_1280.jpg", workType: 'electrical' },
+  // Panel Board — circuit breakers distribution
+  { _id: "cat_panel_board", name_en: "Electrical Panel Board Installation", name_te: "ఎలక్ట్రికల్ ప్యానెల్ బోర్డు సంస్థాపన", image: "https://cdn.pixabay.com/photo/2016/02/19/10/58/electric-1209691_1280.jpg", workType: 'electrical' },
+  // Generator — outdoor commercial installation
+  { _id: "cat_generator", name_en: "Generator Installation", name_te: "జనరేటర్ సంస్థాపన", image: "https://cdn.pixabay.com/photo/2021/01/05/10/25/generator-5890747_1280.jpg", workType: 'electrical' },
+  // Inverter — home battery system
+  { _id: "cat_inverter", name_en: "Inverter Installation", name_te: "ఇన్వర్టర్ సంస్థాపన", image: "https://cdn.pixabay.com/photo/2019/02/19/19/45/power-4007191_1280.jpg", workType: 'electrical' },
+  // Smart Home — touch switch panel
+  { _id: "cat_automation", name_en: "Smart Home Automation", name_te: "స్మార్ట్ హోమ్ ఆటోమేషన్", image: "https://cdn.pixabay.com/photo/2020/08/12/10/28/smart-home-5482800_1280.jpg", workType: 'electrical' },
+  // CCTV — camera installation building
+  { _id: "cat_cctv", name_en: "CCTV Installation", name_te: "సీసీటీవీ సంస్థాపన", image: "https://cdn.pixabay.com/photo/2018/01/26/09/56/camera-3108450_1280.jpg", workType: 'electrical' },
+  // Fire Alarm — commercial detection panel
+  { _id: "cat_fire_alarm", name_en: "Fire Alarm Systems", name_te: "ఫైర్ అలారం వ్యవస్థలు", image: "https://cdn.pixabay.com/photo/2017/06/06/22/37/siren-2377370_1280.jpg", workType: 'electrical' },
+  // Network Cabling — server room structured
+  { _id: "cat_network_cabling", name_en: "Network Cabling", name_te: "నెట్‌వర్క్ కేబ్లింగ్", image: "https://cdn.pixabay.com/photo/2016/11/23/14/45/coding-1854076_1280.jpg", workType: 'electrical' },
+  // Solar — rooftop panel installation
+  { _id: "cat_solar_electrical", name_en: "Solar Electrical Systems", name_te: "సౌర విద్యుత్ వ్యవస్థలు", image: "https://cdn.pixabay.com/photo/2016/04/15/16/00/solar-energy-1330716_1280.jpg", workType: 'electrical' },
+  // Maintenance — electrician testing equipment
+  { _id: "cat_electrical_maintenance", name_en: "Electrical Maintenance Services", name_te: "విద్యుత్ నిర్వహణ సేవలు", image: "https://cdn.pixabay.com/photo/2016/11/29/01/36/home-1866375_1280.jpg", workType: 'electrical' },
+
+  // ─── 3. Lighting Solutions ───────────────────────────────────────────────────
+  // Decorative — luxury interior decorative light
+  { _id: "cat_decorative_lighting", name_en: "Decorative Lighting", name_te: "అలంకార లైటింగ్", image: "https://cdn.pixabay.com/photo/2021/01/05/06/40/lighting-5888726_1280.jpg", workType: 'lighting' },
+  // LED Ceiling — strip false ceiling
+  { _id: "cat_led_ceiling", name_en: "LED Ceiling Lighting", name_te: "ఎల్‌ఈడీ సీలింగ్ లైటింగ్", image: "https://cdn.pixabay.com/photo/2017/08/01/11/48/woman-2563491_1280.jpg", workType: 'lighting' },
+  // Chandeliers — crystal luxury interior
+  { _id: "cat_chandeliers", name_en: "Chandeliers", name_te: "ఝూమర్లు (చాండెలియర్స్)", image: "https://cdn.pixabay.com/photo/2019/01/30/08/45/chandelier-3963792_1280.jpg", workType: 'lighting' },
+  // Pendant — modern above dining table
+  { _id: "cat_pendant_lighting", name_en: "Pendant Lighting", name_te: "పెండెంట్ లైటింగ్", image: "https://cdn.pixabay.com/photo/2016/08/05/09/27/background-1571938_1280.jpg", workType: 'lighting' },
+  // Wall Lighting — mounted decorative interior
+  { _id: "cat_wall_lighting", name_en: "Wall Lighting", name_te: "గోడ లైటింగ్", image: "https://cdn.pixabay.com/photo/2021/10/11/17/44/interior-6701461_1280.jpg", workType: 'lighting' },
+  // Cove Lighting — LED strip hidden ceiling
+  { _id: "cat_cove_lighting", name_en: "Cove Lighting", name_te: "కోవ్ లైటింగ్", image: "https://cdn.pixabay.com/photo/2017/09/09/18/25/living-room-2732939_1280.jpg", workType: 'lighting' },
+  // Landscape — garden pathway night
+  { _id: "cat_landscape_lighting", name_en: "Landscape Lighting", name_te: "ల్యాండ్‌స్కేప్ లైటింగ్", image: "https://cdn.pixabay.com/photo/2015/12/01/20/28/road-1072823_1280.jpg", workType: 'lighting' },
+  // Façade — building exterior night lighting
+  { _id: "cat_facade_lighting", name_en: "Façade Lighting", name_te: "ఫాసాడ్ లైటింగ్", image: "https://cdn.pixabay.com/photo/2016/11/23/15/48/architecture-1853095_1280.jpg", workType: 'lighting' },
+  // Office Lighting — ceiling professional
+  { _id: "cat_office_lighting", name_en: "Office Lighting", name_te: "ఆఫీస్ లైటింగ్", image: "https://cdn.pixabay.com/photo/2015/07/17/22/42/office-849806_1280.jpg", workType: 'lighting' },
+  // Retail Lighting — store display accent
+  { _id: "cat_retail_lighting", name_en: "Retail Lighting", name_te: "రిటైల్ లైటింగ్", image: "https://cdn.pixabay.com/photo/2016/11/22/21/57/apparel-1850804_1280.jpg", workType: 'lighting' },
+  // Street Lighting — urban LED road night
+  { _id: "cat_street_lighting", name_en: "Street Lighting", name_te: "వీధి దీపాలు", image: "https://cdn.pixabay.com/photo/2016/11/23/16/57/street-lights-1854120_1280.jpg", workType: 'lighting' },
+  // Smart Lighting — app controlled home
+  { _id: "cat_smart_lighting_systems", name_en: "Smart Lighting Systems", name_te: "స్మార్ట్ లైటింగ్ వ్యవస్థలు", image: "https://cdn.pixabay.com/photo/2020/08/12/10/28/smart-home-5482800_1280.jpg", workType: 'lighting' }
 ];
 
 const mockDesigns = [
@@ -93,8 +93,8 @@ const mockDesigns = [
     title_te: 'రాజసం ఉట్టిపడే చెక్క లివింగ్ రూమ్',
     category: {
       _id: "cat_living_room",
-      name_en: 'Living Room Design',
-      name_te: 'లివింగ్ రూమ్ డిజైన్',
+      name_en: 'Living Room Interiors',
+      name_te: 'లివింగ్ రూమ్ ఇంటీరియర్స్',
       workType: 'interior'
     },
     images: [
@@ -111,8 +111,8 @@ const mockDesigns = [
     title_te: 'సమకాలీన చార్‌కోల్ L-ఆకారపు వంటగది',
     category: {
       _id: "cat_modular_kitchen",
-      name_en: 'Modular Kitchen',
-      name_te: 'మోడ్యులర్ కిచెన్',
+      name_en: 'Modular Kitchen Interiors',
+      name_te: 'మోడ్యులర్ కిచెన్ ఇంటీరియర్స్',
       workType: 'interior'
     },
     images: [
@@ -129,8 +129,8 @@ const mockDesigns = [
     title_te: 'మినిమలిస్ట్ ఫ్లోటింగ్ టీవీ కన్సోల్',
     category: {
       _id: "cat_tv_unit",
-      name_en: 'TV Unit Design',
-      name_te: 'టీవీ యూనిట్ డిజైన్',
+      name_en: 'TV Unit Designs',
+      name_te: 'టీవీ యూనిట్ డిజైన్లు',
       workType: 'interior'
     },
     images: [
@@ -147,8 +147,8 @@ const mockDesigns = [
     title_te: 'లగ్జరీ మాస్టర్ బెడ్‌రూమ్ సూట్',
     category: {
       _id: "cat_bedroom",
-      name_en: 'Bedroom Interior',
-      name_te: 'బెడ్‌రూమ్ ఇంటీరియర్',
+      name_en: 'Bedroom Interiors',
+      name_te: 'బెడ్‌రూమ్ ఇంటీరియర్స్',
       workType: 'interior'
     },
     images: [
@@ -180,8 +180,8 @@ const mockDesigns = [
     title_te: 'నివాస త్రీ-ఫేజ్ వైరింగ్ పనులు',
     category: {
       _id: "cat_wiring",
-      name_en: 'Complete House Wiring',
-      name_te: 'పూర్తి హౌస్ వైరింగ్',
+      name_en: 'Residential Electrical Wiring',
+      name_te: 'నివాస విద్యుత్ వైరింగ్',
       workType: 'electrical'
     },
     images: ['https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=800&q=80'],
@@ -209,9 +209,9 @@ const mockDesigns = [
     title_en: 'Modern Recessed Cove & LED Panel Layout',
     title_te: 'ఆధునిక కోవ్ లైటింగ్ & ఎల్‌ఈడీ ప్యానెల్ లేఅవుట్',
     category: {
-      _id: "cat_led_panel",
-      name_en: 'LED Panel Lights',
-      name_te: 'ఎల్‌ఈడీ ప్యానెల్ లైట్లు',
+      _id: "cat_led_ceiling",
+      name_en: 'LED Ceiling Lighting',
+      name_te: 'ఎల్‌ఈడీ సీలింగ్ లైటింగ్',
       workType: 'lighting'
     },
     images: ['https://images.unsplash.com/photo-1565814636199-ae8133055c1c?auto=format&fit=crop&w=800&q=80'],
@@ -227,7 +227,7 @@ const mockTeam = [
     role: 'Founder & Head Carpentry Craftsman',
     role_te: 'స్థాపకుడు & ప్రధాన వడ్రంగి హస్తకళాకారుడు',
     exp: '25+ Years',
-    image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400&q=80'
+    image: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=400&q=80'
   }
 ];
 const mockInquiries = [];
@@ -348,7 +348,7 @@ api.interceptors.response.use(
           role: config.data.get('role'),
           role_te: config.data.get('role_te') || '',
           exp: config.data.get('exp'),
-          image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400&q=80"
+          image: "https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=400&q=80"
         };
         mockTeam.push(mockNewMember);
         return { data: mockNewMember };
@@ -407,7 +407,7 @@ api.interceptors.response.use(
           if (role_te) mockTeam[index].role_te = role_te;
           if (exp) mockTeam[index].exp = exp;
           if (imageFile) {
-            mockTeam[index].image = "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400&q=80";
+            mockTeam[index].image = "https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=400&q=80";
           }
           return { data: mockTeam[index] };
         }
@@ -513,8 +513,14 @@ export const designService = {
     }
   },
   getById: async (id) => {
-    const response = await api.get(`/designs/${id}`);
-    return response.data;
+    try {
+      const response = await api.get(`/designs/${id}`);
+      return response.data;
+    } catch (e) {
+      if (e.response?.status === 404) return null;
+      console.error('Error fetching design:', e);
+      return null;
+    }
   },
   create: async (formData) => {
     const response = await api.post('/designs', formData, {

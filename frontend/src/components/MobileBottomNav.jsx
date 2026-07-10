@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Home, Layers, Image, Award, Phone } from 'lucide-react';
+import { Home, Paintbrush, Zap, Lightbulb, Phone } from 'lucide-react';
 
 export default function MobileBottomNav() {
   const { t } = useTranslation();
@@ -14,19 +14,19 @@ export default function MobileBottomNav() {
       icon: <Home className="w-5 h-5" />
     },
     {
-      name: t('nav.categories') || 'Categories',
-      path: '/categories',
-      icon: <Layers className="w-5 h-5" />
+      name: t('nav.interior') || 'Interior',
+      path: '/interior-works',
+      icon: <Paintbrush className="w-5 h-5" />
     },
     {
-      name: 'Portfolio',
-      path: '/designs',
-      icon: <Image className="w-5 h-5" />
+      name: t('nav.electrical') || 'Electrical',
+      path: '/electrical-works',
+      icon: <Zap className="w-5 h-5" />
     },
     {
-      name: t('nav.experience') || 'Experience',
-      path: '/experience',
-      icon: <Award className="w-5 h-5" />
+      name: t('nav.lighting') || 'Lighting',
+      path: '/lighting-solutions',
+      icon: <Lightbulb className="w-5 h-5" />
     },
     {
       name: t('nav.contact') || 'Contact',
@@ -59,3 +59,4 @@ export default function MobileBottomNav() {
     </div>
   );
 }
+

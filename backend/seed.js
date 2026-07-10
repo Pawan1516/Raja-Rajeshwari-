@@ -5,56 +5,47 @@ const Category = require('./models/Category');
 const Design = require('./models/Design');
 
 const categoriesData = [
-  {
-    name_en: 'Living Room Design',
-    name_te: 'లివింగ్ రూమ్ డిజైన్',
-    image: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    name_en: 'Modular Kitchen',
-    name_te: 'మోడ్యులర్ కిచెన్',
-    image: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    name_en: 'Bedroom Interior',
-    name_te: 'బెడ్‌రూమ్ ఇంటీరియర్',
-    image: 'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    name_en: 'Dining Room Design',
-    name_te: 'డైనింగ్ రూమ్ డిజైన్',
-    image: 'https://images.unsplash.com/photo-1617806118233-18e1db207f62?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    name_en: 'TV Unit Design',
-    name_te: 'టీవీ యూనిట్ డిజైన్',
-    image: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    name_en: 'Kids Room Interior',
-    name_te: 'కిడ్స్ రూమ్ ఇంటీరియర్',
-    image: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    name_en: 'Wardrobe Design',
-    name_te: 'వార్డ్‌రోబ్ డిజైన్',
-    image: 'https://images.unsplash.com/photo-1558882224-dda166733079?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    name_en: 'False Ceiling Design',
-    name_te: 'ఫాల్స్ సీలింగ్ డిజైన్',
-    image: 'https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    name_en: 'Lighting Design',
-    name_te: 'లైటింగ్ డిజైన్',
-    image: 'https://images.unsplash.com/photo-1565814636199-ae8133055c1c?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    name_en: 'Wall Decor & Paneling',
-    name_te: 'వాల్ డెకర్ & ప్యానెలింగ్',
-    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80'
-  }
+  // ─── 1. Interior Works ───────────────────────────────────────────────────────
+  { name_en: "Living Room Interiors", name_te: "లివింగ్ రూమ్ ఇంటీరియర్స్", image: "/categories/living_room.jpg", workType: 'interior' },
+  { name_en: "Modular Kitchen Interiors", name_te: "మోడ్యులర్ కిచెన్ ఇంటీరియర్స్", image: "/categories/modular_kitchen.jpg", workType: 'interior' },
+  { name_en: "Bedroom Interiors", name_te: "బెడ్‌రూమ్ ఇంటీరియర్స్", image: "https://cdn.pixabay.com/photo/2017/03/28/12/10/chairs-2181979_1280.jpg", workType: 'interior' },
+  { name_en: "Dining Room Interiors", name_te: "డైనింగ్ రూమ్ ఇంటీరియర్స్", image: "/categories/dining_room.jpg", workType: 'interior' },
+  { name_en: "False Ceiling Designs", name_te: "ఫాల్స్ సీలింగ్ డిజైన్లు", image: "/categories/false_ceiling.jpg", workType: 'interior' },
+  { name_en: "TV Unit Designs", name_te: "టీవీ యూనిట్ డిజైన్లు", image: "/categories/tv_unit.jpg", workType: 'interior' },
+  { name_en: "Wardrobe Designs", name_te: "వార్డ్‌రోబ్ డిజైన్లు", image: "/categories/wardrobe.jpg", workType: 'interior' },
+  { name_en: "Office Interiors", name_te: "ఆఫీస్ ఇంటీరియర్స్", image: "/categories/home_office.jpg", workType: 'interior' },
+  { name_en: "Commercial Interiors", name_te: "కమర్షియల్ ఇంటీరియర్స్", image: "https://cdn.pixabay.com/photo/2017/08/07/09/03/coffee-2600765_1280.jpg", workType: 'interior' },
+  { name_en: "Restaurant & Café Interiors", name_te: "రెస్టారెంట్ & కేఫ్ ఇంటీరియర్స్", image: "https://cdn.pixabay.com/photo/2016/11/29/09/16/architecture-1868667_1280.jpg", workType: 'interior' },
+  { name_en: "Pooja Room Interiors", name_te: "పూజా రూమ్ ఇంటీరియర్స్", image: "https://cdn.pixabay.com/photo/2020/04/09/09/07/hinduism-5020896_1280.jpg", workType: 'interior' },
+  { name_en: "Bathroom Interiors", name_te: "బాత్‌రూమ్ ఇంటీరియర్స్", image: "https://cdn.pixabay.com/photo/2020/10/22/15/42/bathroom-5675254_1280.jpg", workType: 'interior' },
+
+  // ─── 2. Electrical Works ─────────────────────────────────────────────────────
+  { name_en: "Residential Electrical Wiring", name_te: "నివాస విద్యుత్ వైరింగ్", image: "https://cdn.pixabay.com/photo/2016/11/29/01/36/home-1866375_1280.jpg", workType: 'electrical' },
+  { name_en: "Commercial Electrical Installation", name_te: "వాణిజ్య విద్యుత్ సంస్థాపన", image: "https://cdn.pixabay.com/photo/2020/02/07/10/01/electricity-4826344_1280.jpg", workType: 'electrical' },
+  { name_en: "Industrial Electrical Works", name_te: "పారిశ్రామిక విద్యుత్ పనులు", image: "https://cdn.pixabay.com/photo/2015/09/18/12/30/electric-946073_1280.jpg", workType: 'electrical' },
+  { name_en: "Electrical Panel Board Installation", name_te: "ఎలక్ట్రికల్ ప్యానెల్ బోర్డు సంస్థాపన", image: "https://cdn.pixabay.com/photo/2016/02/19/10/58/electric-1209691_1280.jpg", workType: 'electrical' },
+  { name_en: "Generator Installation", name_te: "జనరేటర్ సంస్థాపన", image: "https://cdn.pixabay.com/photo/2021/01/05/10/25/generator-5890747_1280.jpg", workType: 'electrical' },
+  { name_en: "Inverter Installation", name_te: "ఇన్వర్టర్ సంస్థాపన", image: "https://cdn.pixabay.com/photo/2019/02/19/19/45/power-4007191_1280.jpg", workType: 'electrical' },
+  { name_en: "Smart Home Automation", name_te: "స్మార్ట్ హోమ్ ఆటోమేషన్", image: "https://cdn.pixabay.com/photo/2020/08/12/10/28/smart-home-5482800_1280.jpg", workType: 'electrical' },
+  { name_en: "CCTV Installation", name_te: "సీసీటీవీ సంస్థాపన", image: "https://cdn.pixabay.com/photo/2018/01/26/09/56/camera-3108450_1280.jpg", workType: 'electrical' },
+  { name_en: "Fire Alarm Systems", name_te: "ఫైర్ అలారం వ్యవస్థలు", image: "https://cdn.pixabay.com/photo/2017/06/06/22/37/siren-2377370_1280.jpg", workType: 'electrical' },
+  { name_en: "Network Cabling", name_te: "నెట్‌వర్క్ కేబ్లింగ్", image: "https://cdn.pixabay.com/photo/2016/11/23/14/45/coding-1854076_1280.jpg", workType: 'electrical' },
+  { name_en: "Solar Electrical Systems", name_te: "సౌర విద్యుత్ వ్యవస్థలు", image: "https://cdn.pixabay.com/photo/2016/04/15/16/00/solar-energy-1330716_1280.jpg", workType: 'electrical' },
+  { name_en: "Electrical Maintenance Services", name_te: "విద్యుత్ నిర్వహణ సేవలు", image: "https://cdn.pixabay.com/photo/2016/11/29/01/36/home-1866375_1280.jpg", workType: 'electrical' },
+
+  // ─── 3. Lighting Solutions ───────────────────────────────────────────────────
+  { name_en: "Decorative Lighting", name_te: "అలంకార లైటింగ్", image: "https://cdn.pixabay.com/photo/2021/01/05/06/40/lighting-5888726_1280.jpg", workType: 'lighting' },
+  { name_en: "LED Ceiling Lighting", name_te: "ఎల్‌ఈడీ సీలింగ్ లైటింగ్", image: "https://cdn.pixabay.com/photo/2017/08/01/11/48/woman-2563491_1280.jpg", workType: 'lighting' },
+  { name_en: "Chandeliers", name_te: "ఝూమర్లు (చాండెలియర్స్)", image: "https://cdn.pixabay.com/photo/2019/01/30/08/45/chandelier-3963792_1280.jpg", workType: 'lighting' },
+  { name_en: "Pendant Lighting", name_te: "పెండెంట్ లైటింగ్", image: "https://cdn.pixabay.com/photo/2016/08/05/09/27/background-1571938_1280.jpg", workType: 'lighting' },
+  { name_en: "Wall Lighting", name_te: "గోడ లైటింగ్", image: "https://cdn.pixabay.com/photo/2021/10/11/17/44/interior-6701461_1280.jpg", workType: 'lighting' },
+  { name_en: "Cove Lighting", name_te: "కోవ్ లైటింగ్", image: "https://cdn.pixabay.com/photo/2017/09/09/18/25/living-room-2732939_1280.jpg", workType: 'lighting' },
+  { name_en: "Landscape Lighting", name_te: "ల్యాండ్‌స్కేప్ లైటింగ్", image: "https://cdn.pixabay.com/photo/2015/12/01/20/28/road-1072823_1280.jpg", workType: 'lighting' },
+  { name_en: "Façade Lighting", name_te: "ఫాసాడ్ లైటింగ్", image: "https://cdn.pixabay.com/photo/2016/11/23/15/48/architecture-1853095_1280.jpg", workType: 'lighting' },
+  { name_en: "Office Lighting", name_te: "ఆఫీస్ లైటింగ్", image: "https://cdn.pixabay.com/photo/2015/07/17/22/42/office-849806_1280.jpg", workType: 'lighting' },
+  { name_en: "Retail Lighting", name_te: "రిటైల్ లైటింగ్", image: "https://cdn.pixabay.com/photo/2016/11/22/21/57/apparel-1850804_1280.jpg", workType: 'lighting' },
+  { name_en: "Street Lighting", name_te: "వీధి దీపాలు", image: "https://cdn.pixabay.com/photo/2016/11/23/16/57/street-lights-1854120_1280.jpg", workType: 'lighting' },
+  { name_en: "Smart Lighting Systems", name_te: "స్మార్ట్ లైటింగ్ వ్యవస్థలు", image: "https://cdn.pixabay.com/photo/2020/08/12/10/28/smart-home-5482800_1280.jpg", workType: 'lighting' }
 ];
 
 const seedDB = async () => {
@@ -84,10 +75,10 @@ const seedDB = async () => {
     console.log(`Inserted ${categories.length} Design Categories.`);
 
     // Find category IDs to assign to sample designs
-    const livingRoomId = categories.find(c => c.name_en === 'Living Room Design')._id;
-    const kitchenId = categories.find(c => c.name_en === 'Modular Kitchen')._id;
-    const tvUnitId = categories.find(c => c.name_en === 'TV Unit Design')._id;
-    const bedroomId = categories.find(c => c.name_en === 'Bedroom Interior')._id;
+    const livingRoomId = categories.find(c => c.name_en === 'Living Room Interiors')._id;
+    const kitchenId = categories.find(c => c.name_en === 'Modular Kitchen Interiors')._id;
+    const tvUnitId = categories.find(c => c.name_en === 'TV Unit Designs')._id;
+    const bedroomId = categories.find(c => c.name_en === 'Bedroom Interiors')._id;
 
     // Create Sample Designs
     const sampleDesigns = [

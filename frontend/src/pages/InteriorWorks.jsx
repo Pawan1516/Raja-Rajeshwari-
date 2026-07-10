@@ -1,297 +1,305 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Briefcase, Box, Layers, Palette, Grid, Scissors, Hammer, ArrowRight, CheckCircle2, MessageSquare, Phone } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { ArrowRight, MessageSquare, Phone, Shield, ThumbsUp, Wrench, Clock } from 'lucide-react';
+import { categoryService } from '../services/api';
 import { WA_GENERAL_LINK, TEL_LINK } from '../constants';
+
+const categoryDetails = {
+  "Living Room Interiors": {
+    desc_en: "Premium living room designs with elegant furniture, wall paneling, and false ceiling works.",
+    desc_te: "అందమైన ఫర్నిచర్, గోడ ప్యానలింగ్ మరియు ఫాల్స్ సీలింగ్ పనులతో కూడిన ప్రీమియం లివింగ్ రూమ్ డిజైన్లు."
+  },
+  "Modular Kitchen Interiors": {
+    desc_en: "Functional modular kitchens with high-end fixtures, space-saving cabinets, and premium countertops.",
+    desc_te: "అత్యాధునిక అమరికలు, స్థలాన్ని ఆదా చేసే క్యాబినెట్లు మరియు కౌంటర్‌టాప్‌లతో కూడిన మాడ్యులర్ కిచెన్‌లు."
+  },
+  "Bedroom Interiors": {
+    desc_en: "Elegant and cozy bedroom designs with custom wardrobes, headboards, and soft lighting.",
+    desc_te: "అనుకూలీకరించిన వార్డ్‌రోబ్‌లు, హెడ్‌బోర్డ్‌లు మరియు ఆహ్లాదకరమైన లైటింగ్‌తో కూడిన బెడ్‌రూమ్ డిజైన్లు."
+  },
+  "Dining Room Interiors": {
+    desc_en: "Elegant dining spaces featuring premium dining tables, custom seating, and ambient lighting.",
+    desc_te: "ప్రీమియం డైనింగ్ టేబుల్‌లు, అనుకూల సీటింగ్ మరియు యాంబియంట్ లైటింగ్‌తో కూడిన అందమైన డైనింగ్ స్థలాలు."
+  },
+  "False Ceiling Designs": {
+    desc_en: "Creative false ceiling layouts with integrated LED lighting and premium finishes.",
+    desc_te: "ఇంటిగ్రేటెడ్ ఎల్‌ఈడీ లైటింగ్ మరియు ప్రీమియం ఫినిషింగ్‌లతో కూడిన సృజనాత్మక ఫాల్స్ సీలింగ్ లేఅవుట్లు."
+  },
+  "TV Unit Designs": {
+    desc_en: "Modern floating and wall-mounted TV consoles with hidden cable paths and storage.",
+    desc_te: "దాచిన కేబుల్ మార్గాలు మరియు స్టోరేజ్‌తో కూడిన ఆధునిక ఫ్లోటింగ్ మరియు వాల్-మౌంటెడ్ టీవీ కన్సోల్‌లు."
+  },
+  "Wardrobe Designs": {
+    desc_en: "Custom sliding and openable wardrobe units engineered for space and premium aesthetics.",
+    desc_te: "స్థలం మరియు ప్రీమియం సౌందర్యం కోసం రూపొందించబడిన అనుకూల స్లైడింగ్ మరియు ఓపెన్ వార్డ్‌రోబ్‌లు."
+  },
+  "Office Interiors": {
+    desc_en: "Productive corporate workspaces and office cabins with ergonomic furniture and partitions.",
+    desc_te: "సౌకర్యవంతమైన ఫర్నిచర్ మరియు విభజనలతో కూడిన ఉత్పాదక కార్పొరేట్ వర్క్‌స్పేస్‌లు మరియు ఆఫీస్ క్యాబిన్‌లు."
+  },
+  "Commercial Interiors": {
+    desc_en: "Sophisticated retail spaces and showrooms designed to engage customers and highlight products.",
+    desc_te: "కస్టమర్లను ఆకట్టుకోవడానికి మరియు ఉత్పత్తులను ప్రదర్శించడానికి రూపొందించిన అధునాతన రిటైల్ మరియు షోరూమ్ స్థలాలు."
+  },
+  "Restaurant & Café Interiors": {
+    desc_en: "Atmospheric restaurant and cafe designs focusing on comfort, layout, and lighting.",
+    desc_te: "సౌకర్యం, లేఅవుట్ మరియు లైటింగ్‌పై దృష్టి సారించే ఆహ్లాదకరమైన రెస్టారెంట్ మరియు కేఫ్ డిజైన్లు."
+  },
+  "Pooja Room Interiors": {
+    desc_en: "Peaceful pooja rooms combining traditional wooden carvings and elegant marble work.",
+    desc_te: "సాంప్రదాయ చెక్క శిల్పాలు మరియు సొగసైన మార్బుల్ వర్క్‌లను మిళితం చేసే ప్రశాంతమైన పూజా గదులు."
+  },
+  "Bathroom Interiors": {
+    desc_en: "Sleek vanity cabinets, modern tile work, and luxury sanitary fitting layouts.",
+    desc_te: "సొగసైన వానిటీ క్యాబినెట్‌లు, ఆధునిక టైల్ వర్క్ మరియు లగ్జరీ శానిటరీ ఫిట్టింగ్ లేఅవుట్లు."
+  }
+};
 
 export default function InteriorWorks() {
   const { t, i18n } = useTranslation();
-  const [activeTab, setActiveTab] = useState('residential');
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const tabs = [
-    { id: 'residential', name: i18n.language === 'te' ? 'నివాస ఇంటీరియర్' : 'Residential Interior', icon: <Home className="w-4 h-4" /> },
-    { id: 'commercial', name: i18n.language === 'te' ? 'వ్యాపార ఇంటీరియర్' : 'Commercial Interior', icon: <Briefcase className="w-4 h-4" /> },
-    { id: 'modular', name: i18n.language === 'te' ? 'మాడ్యులర్ పనులు' : 'Modular Works', icon: <Box className="w-4 h-4" /> },
-    { id: 'ceiling', name: i18n.language === 'te' ? 'సీలింగ్ పనులు' : 'Ceiling Works', icon: <Layers className="w-4 h-4" /> },
-    { id: 'wall', name: i18n.language === 'te' ? 'గోడల అలంకరణ' : 'Wall Works', icon: <Grid className="w-4 h-4" /> },
-    { id: 'flooring', name: i18n.language === 'te' ? 'ఫ్లోరింగ్' : 'Flooring', icon: <Scissors className="w-4 h-4" /> },
-    { id: 'furniture', name: i18n.language === 'te' ? 'ఫర్నిచర్ పనులు' : 'Furniture Works', icon: <Hammer className="w-4 h-4" /> },
-    { id: 'painting', name: i18n.language === 'te' ? 'పెయింటింగ్ & ఫినిషింగ్' : 'Painting & Finishing', icon: <Palette className="w-4 h-4" /> },
-  ];
+  useEffect(() => {
+    async function fetchCats() {
+      try {
+        const allCats = await categoryService.getAll();
+        const filtered = allCats.filter(cat => cat.workType === 'interior');
+        setCategories(filtered);
+      } catch (error) {
+        console.error("Failed to load interior categories", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchCats();
+  }, []);
 
-  const servicesData = {
-    residential: {
-      title: i18n.language === 'te' ? 'నివాస ఇంటీరియర్ పనులు' : 'Residential Interior Works',
-      description: i18n.language === 'te' 
-        ? 'మీ అభిరుచులకు అనుగుణంగా అందమైన, సౌకర్యవంతమైన ఇళ్లను రూపొందించడం మా ప్రత్యేకత.' 
-        : 'Designing elegant, comfortable, and personalized living spaces that reflect your unique style and family lifestyle.',
-      items: [
-        { name: 'Living Room Interior', img: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80', desc: 'Premium entertainment units, customizable wall paneling, and comfortable seating layouts.' },
-        { name: 'Bedroom Interior', img: 'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=800&q=80', desc: 'Cozy wardrobes, elegant headboard designs, false ceilings, and ambient lighting settings.' },
-        { name: 'Kitchen Interior', img: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=800&q=80', desc: 'Space-saving modular cabinets, chimneys, durable pull-out baskets, and robust countertops.' },
-        { name: 'Dining Room Interior', img: 'https://images.unsplash.com/photo-1617806118233-18e1db207f62?auto=format&fit=crop&w=800&q=80', desc: 'Custom dining tables, partition designs, and gorgeous pendant lighting schemes.' },
-        { name: 'Bathroom Interior', img: 'https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?auto=format&fit=crop&w=800&q=80', desc: 'Sleek vanity cabinets, modern tile works, and high-end sanitary fittings layout.' },
-        { name: 'Children\'s Room', img: 'https://images.unsplash.com/photo-1595853035070-59a39fe84de3?auto=format&fit=crop&w=800&q=80', desc: 'Vibrant colors, space-saving bunk beds, study tables, and playful wall decals.' }
-      ],
-      features: ['Personalized Design Consultations', 'Ergonomic Space Utilization', 'Premium Durable Laminates', 'Eco-friendly Materials']
-    },
-    commercial: {
-      title: i18n.language === 'te' ? 'వ్యాపార ఇంటీరియర్ పనులు' : 'Commercial Interior Works',
-      description: i18n.language === 'te' 
-        ? 'ఉత్పాదకతను పెంచే మరియు కస్టమర్లను ఆకట్టుకునే ఆధునిక ఆఫీస్ మరియు షోరూమ్ డిజైన్లు.' 
-        : 'Creating high-performance workspace environments that inspire collaboration, enhance productivity, and impress clients.',
-      items: [
-        { name: 'Office Interior', img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80', desc: 'Ergonomic workstations, partition systems, executive cabins, and sleek reception desks.' },
-        { name: 'Retail Shop Interior', img: 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=800&q=80', desc: 'Aesthetic product display racks, premium glass showcases, and optimal walking space layouts.' },
-        { name: 'Restaurant & Café', img: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80', desc: 'Cozy and dynamic seating configurations, ambient lighting layouts, and custom bars.' },
-        { name: 'Hotel Interior', img: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80', desc: 'Luxury lobby counters, ambient guest rooms, wall paneling, and false ceiling works.' },
-        { name: 'Hospital & Clinic', img: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80', desc: 'Hygienic layouts, comfortable waiting lounges, storage systems, and durable flooring.' },
-        { name: 'Showroom Interior', img: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=80', desc: 'Elegant theme-based layouts, focus lighting systems, and comfortable customer lounges.' }
-      ],
-      features: ['Brand Identity Integration', 'Optimal Foot-Traffic Planning', 'Accoustic Control Options', 'Heavy-Duty Commercial Materials']
-    },
-    modular: {
-      title: i18n.language === 'te' ? 'మాడ్యులర్ ఫిట్టింగ్స్ & కిచెన్లు' : 'Modular Fittings & Kitchens',
-      description: i18n.language === 'te' 
-        ? 'అధునిక మాడ్యులర్ కిచెన్లు మరియు స్పేస్-సేవింగ్ వార్డ్‌రోబ్స్.' 
-        : 'Smart, customizable, and factory-finished storage modules designed for contemporary space optimization.',
-      items: [
-        { name: 'Modular Kitchen', img: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80', desc: 'L-Shaped, U-Shaped, Parallel, or Island layouts with soft-close drawers and chimneys.' },
-        { name: 'Modular Wardrobes', img: 'https://images.unsplash.com/photo-1558882224-cca166733360?auto=format&fit=crop&w=800&q=80', desc: 'Sliding wardrobes, openable closets, customizable drawers, and built-in dressing mirrors.' },
-        { name: 'TV Units', img: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=800&q=80', desc: 'Floating media consoles, back-lit panel boards, storage drawers, and wire management.' },
-        { name: 'Storage Cabinets', img: 'https://images.unsplash.com/photo-1595515106969-1ce29566ff1c?auto=format&fit=crop&w=800&q=80', desc: 'Bookshelves, shoe racks, crockery displays, and custom space-saving utility cabinets.' }
-      ],
-      features: ['Soft-Close Hydraulic Hinge systems', 'Waterproof BWP Plywood', 'Scratch-Resistant Acrylic/Laminate', '10-Year Material Warranty']
-    },
-    ceiling: {
-      title: i18n.language === 'te' ? 'ఫాల్స్ సీలింగ్ డిజైన్లు' : 'False Ceiling & Ceiling Works',
-      description: i18n.language === 'te' 
-        ? 'ఆకర్షణీయమైన లైటింగ్ మరియు హీట్ ఇన్సులేషన్‌తో కూడిన ఫాల్స్ సీలింగ్స్.' 
-        : 'Architectural false ceilings providing visual depth, sound insulation, and perfect cove lighting placement.',
-      items: [
-        { name: 'Gypsum Ceiling', img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80', desc: 'Perfect seamless plaster finishes, modern curves, and step patterns.' },
-        { name: 'POP Ceiling', img: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=800&q=80', desc: 'Plaster of Paris custom cornices, classical moldings, and artistic geometric shapes.' },
-        { name: 'PVC Ceiling', img: 'https://images.unsplash.com/photo-1527030280862-64139fbe04ca?auto=format&fit=crop&w=800&q=80', desc: 'Moisture-resistant panels, wood texture finishes, quick and dust-free installations.' },
-        { name: 'Wooden Ceiling', img: 'https://images.unsplash.com/photo-1449157291145-7efd050a4d0e?auto=format&fit=crop&w=800&q=80', desc: 'Premium teak wood styling, luxury veneers, and warm accent rafter styling.' }
-      ],
-      features: ['Rust-proof GI Metal Framework', 'LED/Cove Lighting Ready', 'Thermal & Acoustic Insulation', 'Seamless Joint Finishes']
-    },
-    wall: {
-      title: i18n.language === 'te' ? 'వాల్ క్లాడింగ్ & ప్యానెలింగ్' : 'Wall Cladding & Wall Works',
-      description: i18n.language === 'te' 
-        ? 'మీ గోడలకు కొత్త లుక్ తెచ్చే వాల్ పేపర్స్ మరియు చెక్క ప్యానెల్స్.' 
-        : 'Elevating plain walls into architectural focal points with textured cladding, veneers, and custom paneling.',
-      items: [
-        { name: 'Wallpaper Installation', img: 'https://images.unsplash.com/photo-1534349762230-e0cadf78f5da?auto=format&fit=crop&w=800&q=80', desc: 'Imported 3D textured wallpaper rolls, waterproof prints, and customized photo murals.' },
-        { name: 'Wall Paneling', img: 'https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?auto=format&fit=crop&w=800&q=80', desc: 'WPC fluted panels, MDF decorative boards, charcoal louvers, and cushion paddings.' },
-        { name: 'Stone Cladding', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80', desc: 'Natural slate tiles, stone veneers, brick tiles, and high-end marble panel backdrops.' }
-      ],
-      features: ['Termite & Moisture Resistant Panels', 'Quick Dust-Free Mountings', 'Easy-to-clean Anti-scratch Surfaces', 'Hidden Cable Wire Tracks']
-    },
-    flooring: {
-      title: i18n.language === 'te' ? 'ప్రీమియం ఫ్లోరింగ్ పనులు' : 'Premium Flooring Works',
-      description: i18n.language === 'te' 
-        ? 'మన్నికైన చెక్క, మార్బుల్ మరియు గ్రానైట్ ఫ్లోరింగ్స్.' 
-        : 'Elegant, wear-resistant, and high-density flooring layouts that ground your interiors with character.',
-      items: [
-        { name: 'Wooden Flooring', img: 'https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?auto=format&fit=crop&w=800&q=80', desc: 'Laminated hardwood floors, click-lock systems, and scratch-resistant finishes.' },
-        { name: 'Marble & Granite', img: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80', desc: 'Premium Italian marble polishing, mirror-gloss granite tiles, and natural borders.' },
-        { name: 'Vinyl & Tile Flooring', img: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80', desc: 'Waterproof SPC vinyl planks, anti-skid ceramic tiles, and vitrified floor layouts.' }
-      ],
-      features: ['Under-layment Sound Absorber', 'Seamless Interlock Layouts', 'Stain & Scratch Protection Coatings', 'Water-resistant Adhesives']
-    },
-    furniture: {
-      title: i18n.language === 'te' ? 'కస్టమ్ ఫర్నిచర్ తయారీ' : 'Custom & Specialized Furniture',
-      description: i18n.language === 'te' 
-        ? 'ఖచ్చితమైన కొలతలతో హ్యాండ్ మేడ్ చెక్క ఫర్నిచర్.' 
-        : 'Tailored luxury furniture handcrafted by expert carpenters to blend seamlessly with your interior dimensions.',
-      items: [
-        { name: 'Custom Sofa & Seating', img: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=800&q=80', desc: 'L-shaped lounger sofas, premium velvet/leather upholstery, and high-density foam padding.' },
-        { name: 'Bespoke Dining Sets', img: 'https://images.unsplash.com/photo-1530018607912-eff2df134f4e?auto=format&fit=crop&w=800&q=80', desc: 'Teak wood dining frames, marble tables, and ergonomically shaped dining chairs.' },
-        { name: 'Home Office Furniture', img: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=80', desc: 'Custom study desks, floating book racks, file drawer cabinets, and office tables.' }
-      ],
-      features: ['Solid Teak Wood & BWP Frame base', 'Premium High-Density Foam (40+ Density)', 'Stain-Resistant Fabric Selections', 'Customized Dimension Sizing']
-    },
-    painting: {
-      title: i18n.language === 'te' ? 'పెయింటింగ్ & వాల్ ఫినిషింగ్స్' : 'Painting & Decorative Finishing',
-      description: i18n.language === 'te' 
-        ? 'రాయల్ టచ్ ఇచ్చే లగ్జరీ పెయింట్స్ మరియు టెక్స్చర్స్.' 
-        : 'Adding color depth, texture, and protective seals using premium emulsions, wood polishes, and custom texture wall finishes.',
-      items: [
-        { name: 'Interior & Emulsion Painting', img: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?auto=format&fit=crop&w=800&q=80', desc: 'Flawless wall putty preparation, primer coatings, and washable royal emulsions.' },
-        { name: 'Texture & Royal Play', img: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=800&q=80', desc: 'Artistic metallic patterns, rustic stone textures, and custom stencil designs.' },
-        { name: 'Wood Polish & PU Finish', img: 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&w=800&q=80', desc: 'Melamine spray coatings, clear PU waterproofing gloss, and natural teak oil rubbing.' }
-      ],
-      features: ['Eco-friendly Low VOC Paints', 'Advanced Putty Sanding Machines', 'Waterproof Base Coat Primers', 'Durable UV-resistant Polishes']
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.08
+      }
     }
   };
 
-  const activeData = servicesData[activeTab];
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 80, delay: 0.05 } }
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-10 pb-20">
+    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-forest selection:text-white">
       
-      {/* ─── HEADER BANNER ─── */}
-      <section className="bg-slate-900 text-white py-16 mb-12 border-b-4 border-wood relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(139,90,43,0.15)_0%,transparent_60%)]"></div>
+      {/* ─── HERO HEADER BANNER ─── */}
+      <section className="relative overflow-hidden py-24 border-b border-slate-800 bg-slate-950">
+        {/* Background Image showing clearly with dark overlay */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="/backgrounds/interior_bg.jpg" 
+            alt="Interior Works Background" 
+            className="w-full h-full object-cover opacity-60"
+          />
+          <div className="absolute inset-0 bg-slate-950/65 backdrop-blur-[0.5px]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/30" />
+        </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <span className="text-wood-light uppercase text-xs font-semibold tracking-widest block mb-2 font-sans">
-            Craftsmanship Excellence
-          </span>
-          <h1 className="text-4xl sm:text-5xl font-outfit font-extrabold tracking-tight">
-            {i18n.language === 'te' ? 'ఇంటీరియర్ డిజైనింగ్ పనులు' : 'Interior Designing & Works'}
-          </h1>
-          <p className="text-slate-400 text-sm max-w-xl mx-auto mt-4 leading-relaxed font-sans">
+          <motion.span 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-wood uppercase text-xs font-bold tracking-widest block mb-4"
+          >
+            {i18n.language === 'te' ? 'భారతదేశం అంతటా ప్రీమియం సేవలు' : 'PREMIUM SERVICES ACROSS INDIA'}
+          </motion.span>
+          
+          <motion.h1 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-3xl sm:text-5xl lg:text-6xl font-outfit font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-[1.15]"
+          >
             {i18n.language === 'te' 
-              ? 'మాడ్యులర్ కిచెన్లు, వార్డ్‌రోబ్స్, ఫాల్స్ సీలింగ్స్ మరియు కస్టమ్ వుడ్ వర్క్స్‌లో లగ్జరీ సొల్యూషన్స్.'
-              : 'End-to-end bespoke home styling, modular systems, wooden fittings, false ceilings, and premium wall treatments.'}
-          </p>
+              ? 'సృజనాత్మక ఇంటీరియర్స్, విశ్వసనీయ ఎలక్ట్రికల్ పనులు మరియు వినూత్న లైటింగ్ సొల్యూషన్స్.'
+              : 'Transforming Spaces with Creative Interiors, Reliable Electrical Systems, and Innovative Lighting Solutions.'}
+          </motion.h1>
+          
+          <motion.p 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-slate-200 text-sm sm:text-base max-w-3xl mx-auto mt-6 leading-relaxed"
+          >
+            {i18n.language === 'te'
+              ? 'ఆధునిక డిజైన్, భద్రత, కార్యాచరణ మరియు శక్తి సామర్థ్యంతో నివాస మరియు వాణిజ్య అనుకూల పరిష్కారాలను అందించడం మా ధ్యేయం.'
+              : 'Deliver premium residential and commercial solutions with modern design, safety, functionality, and energy efficiency.'}
+          </motion.p>
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* ─── MAIN CONTENT ─── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         
-        {/* ─── GLASSMORPHIC TABS BAR ─── */}
-        <div className="flex overflow-x-auto gap-2 p-2 mb-10 hide-scrollbar snap-x scroll-smooth glass-premium rounded-3xl border border-slate-200/50 shadow-sm max-w-full">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold transition-smooth shrink-0 snap-start ${
-                activeTab === tab.id
-                  ? 'bg-wood text-white shadow-md shadow-wood/15 scale-[1.01]'
-                  : 'text-slate-600 hover:bg-white/60 hover:text-slate-900'
-              }`}
+        {/* SECTION INTRO */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+          <div className="max-w-2xl">
+            <h2 className="text-2xl sm:text-4xl font-outfit font-extrabold text-forest-dark">
+              {i18n.language === 'te' ? 'ఇంటీరియర్ వర్క్స్ కెటలాగ్' : 'Interior Works Catalog'}
+            </h2>
+            <div className="h-1.5 w-24 bg-gradient-to-r from-forest to-forest-light rounded-full mt-3"></div>
+            <p className="text-slate-500 text-xs sm:text-sm mt-4 leading-relaxed">
+              {i18n.language === 'te'
+                ? 'వ్యక్తిగతీకరించిన ఇంటీరియర్ డిజైన్లు మరియు కస్టమ్ వుడ్ వర్క్స్‌లో లగ్జరీ పరిష్కారాలు.'
+                : 'Bespoke residential and commercial interior solutions handcrafted to perfection. From luxury living areas to modular kitchens, we bring your vision to life.'}
+            </p>
+          </div>
+          
+          {/* QUICK ACTIONS */}
+          <div className="flex flex-wrap gap-3">
+            <a
+              href={`${WA_GENERAL_LINK}&text=${encodeURIComponent(
+                `Hello Raja Rajeshwari Interiors, I want to inquire about your Interior Works.`
+              )}`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-2 bg-forest hover:bg-forest-dark text-white py-2.5 px-5 rounded-full text-xs font-bold transition-all duration-300 shadow-md hover:scale-105"
             >
-              {tab.icon}
-              <span>{tab.name}</span>
-            </button>
-          ))}
+              <MessageSquare className="w-4 h-4" />
+              <span>WhatsApp Chat</span>
+            </a>
+            <a
+              href={TEL_LINK}
+              className="flex items-center gap-2 bg-white hover:bg-green-50 text-forest-dark py-2.5 px-5 rounded-full text-xs font-bold transition-all duration-300 hover:scale-105 border border-forest/30 shadow-sm"
+            >
+              <Phone className="w-4 h-4 text-forest" />
+              <span>{t('common.call_now')}</span>
+            </a>
+          </div>
         </div>
 
-        {/* ─── TAB CONTENT DISPLAY ─── */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.4 }}
-            className="space-y-12"
+        {/* LOADING STATE */}
+        {loading ? (
+          <div className="flex justify-center items-center py-24">
+            <div className="w-12 h-12 border-4 border-forest/20 border-t-forest rounded-full animate-spin"></div>
+          </div>
+        ) : (
+          /* ─── 12 CATEGORIES GRID ─── */
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           >
-            {/* Service Banner Info */}
-            <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-premium grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
-              <div className="lg:col-span-2 space-y-4">
-                <h2 className="text-2xl sm:text-3xl font-outfit font-extrabold text-slate-900">
-                  {activeData.title}
-                </h2>
-                <p className="text-slate-500 text-sm leading-relaxed">
-                  {activeData.description}
-                </p>
-              </div>
+            {categories.map((cat, index) => {
+              const details = categoryDetails[cat.name_en] || {
+                desc_en: "High-quality professional interior designing services tailored to your space.",
+                desc_te: "మీ స్థలానికి అనుగుణంగా రూపొందించిన అధిక నాణ్యత గల ప్రొఫెషనల్ ఇంటీరియర్ డిజైనింగ్ సేవలు."
+              };
+              const desc = i18n.language === 'te' ? details.desc_te : details.desc_en;
+              const title = i18n.language === 'te' ? cat.name_te : cat.name_en;
 
-              {/* Action Buttons Box */}
-              <div className="bg-slate-950 p-6 rounded-2xl text-white space-y-4 shadow-lg text-center lg:text-left">
-                <p className="text-xs text-wood-light uppercase tracking-wider font-semibold">
-                  {i18n.language === 'te' ? 'ఉచిత కొటేషన్ పొందండి' : 'Need Custom Sizing?'}
-                </p>
-                <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5">
-                  <a
-                    href={`${WA_GENERAL_LINK}&text=${encodeURIComponent(
-                      `Hello, I would like to get a quote/details for ${activeData.title}.`
-                    )}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center justify-center gap-2 bg-whatsapp hover:bg-whatsappdark text-white py-2.5 px-4 rounded-xl text-xs font-bold transition-smooth shadow-sm"
-                  >
-                    <MessageSquare className="w-4 h-4" />
-                    <span>WhatsApp Inquiry</span>
-                  </a>
-                  <a
-                    href={TEL_LINK}
-                    className="flex items-center justify-center gap-2 bg-forest hover:bg-forest-dark text-white py-2.5 px-4 rounded-xl text-xs font-bold transition-smooth shadow-call-glow"
-                  >
-                    <Phone className="w-4 h-4" />
-                    <span>{t('common.call_now')}</span>
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* Subcategories Grid */}
-            <div className="space-y-6">
-              <h3 className="font-outfit font-bold text-lg text-slate-800 border-l-4 border-wood pl-3">
-                {i18n.language === 'te' ? 'లభ్యమయ్యే డిజైన్లు & విభాగాలు' : 'Available Service Areas'}
-              </h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {activeData.items.map((item, index) => (
-                  <motion.div
-                    key={index}
-                    className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-premium hover:shadow-premium-hover transition-smooth flex flex-col group"
-                    whileHover={{ y: -4 }}
-                  >
-                    <div className="h-48 overflow-hidden relative">
-                      <img
-                        src={item.img}
-                        alt={item.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-smooth"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
-                      <span className="absolute bottom-3 left-4 bg-wood/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider font-sans">
-                        {item.name}
-                      </span>
-                    </div>
-                    
-                    <div className="p-5 flex-grow flex flex-col justify-between space-y-4">
-                      <div>
-                        <h4 className="font-outfit font-bold text-slate-800 text-base">
-                          {item.name}
-                        </h4>
-                        <p className="text-slate-500 text-xs mt-2 leading-relaxed">
-                          {item.desc}
-                        </p>
-                      </div>
-
-                      <div className="pt-2 border-t border-slate-50 flex justify-between items-center text-xs">
-                        <a
-                          href={`${WA_GENERAL_LINK}&text=${encodeURIComponent(
-                            `Hello Raja Rajeshwari Interiors, I am interested in your ${item.name} service.`
-                          )}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-wood font-bold hover:text-wood-dark flex items-center gap-1.5 transition-smooth group/link"
-                        >
-                          <span>Request Quote</span>
-                          <ArrowRight className="w-3.5 h-3.5 group-hover/link:translate-x-1 transition-smooth" />
-                        </a>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-
-            {/* Quality Standard Badging */}
-            <div className="bg-slate-100 p-8 rounded-3xl border border-slate-200/60">
-              <h3 className="font-outfit font-bold text-lg text-slate-800 mb-4 text-center sm:text-left">
-                {i18n.language === 'te' ? 'మా నాణ్యతా ప్రమాణాలు' : 'Our Craftsmanship Standards'}
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {activeData.features.map((feat, idx) => (
-                  <div key={idx} className="bg-white rounded-xl p-4 flex items-center gap-3 border border-slate-200/40">
-                    <CheckCircle2 className="w-5 h-5 text-forest shrink-0" />
-                    <span className="text-xs font-semibold text-slate-700">{feat}</span>
+              return (
+                <motion.div
+                  key={cat._id || index}
+                  variants={itemVariants}
+                  whileHover={{ y: -6 }}
+                  className="bg-white rounded-3xl overflow-hidden border border-green-100 shadow-md hover:shadow-xl flex flex-col group transition-all duration-300"
+                >
+                  {/* Image Container with zoom effect */}
+                  <div className="h-60 overflow-hidden relative">
+                    <img
+                      src={cat.image}
+                      alt={title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-forest-dark/70 via-forest-dark/10 to-transparent"></div>
+                    <span className="absolute bottom-4 left-4 bg-forest/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest font-sans">
+                      {i18n.language === 'te' ? 'ఇంటీరియర్' : 'INTERIOR'}
+                    </span>
                   </div>
-                ))}
+                  
+                  {/* Card Body */}
+                  <div className="p-6 flex-grow flex flex-col justify-between space-y-4">
+                    <div className="space-y-2.5">
+                      <h3 className="font-outfit font-bold text-slate-800 text-lg group-hover:text-forest transition-colors duration-300">
+                        {title}
+                      </h3>
+                      <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">
+                        {desc}
+                      </p>
+                    </div>
+
+                    {/* Card Actions */}
+                    <div className="pt-4 border-t border-green-100 flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+                      <Link
+                        to={`/designs?category=${cat._id}`}
+                        className="flex items-center justify-center gap-1.5 bg-forest hover:bg-forest-dark text-white py-2 px-4 rounded-xl text-xs font-bold transition-all duration-300 hover:shadow-lg hover:shadow-forest/20"
+                      >
+                        <span>{i18n.language === 'te' ? 'ప్రాజెక్టులు' : 'View Projects'}</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
+
+                      <a
+                        href={`${WA_GENERAL_LINK}&text=${encodeURIComponent(
+                          `Hello Raja Rajeshwari Interiors, I am interested in Interior Works: ${cat.name_en}.`
+                        )}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-forest hover:text-forest-dark font-semibold text-xs flex items-center justify-center gap-1 py-2"
+                      >
+                        <span>{i18n.language === 'te' ? 'కోట్ అడగండి' : 'Request Quote'}</span>
+                      </a>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        )}
+
+        {/* ─── CRAFTSMANSHIP STANDARDS ─── */}
+        <div className="bg-green-50 rounded-3xl p-8 border border-green-200 mt-20 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-forest/5 rounded-full blur-3xl pointer-events-none"></div>
+          <h3 className="font-outfit font-extrabold text-lg sm:text-2xl text-forest-dark mb-6 text-center sm:text-left">
+            {i18n.language === 'te' ? 'మా నాణ్యతా ప్రమాణాలు' : 'Our Interior Craftsmanship Standards'}
+          </h3>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-white rounded-2xl p-5 border border-green-100 shadow-sm flex items-start gap-4">
+              <Shield className="w-8 h-8 text-forest shrink-0 mt-1" />
+              <div>
+                <h4 className="text-sm font-bold text-slate-800 mb-1">BWP Waterproof Plywood</h4>
+                <p className="text-slate-500 text-xs leading-relaxed">Termite-proof, heavy-duty base material with a lifetime warranty support.</p>
               </div>
             </div>
-
-          </motion.div>
-        </AnimatePresence>
+            <div className="bg-white rounded-2xl p-5 border border-green-100 shadow-sm flex items-start gap-4">
+              <ThumbsUp className="w-8 h-8 text-forest shrink-0 mt-1" />
+              <div>
+                <h4 className="text-sm font-bold text-slate-800 mb-1">Premium Hardware</h4>
+                <p className="text-slate-500 text-xs leading-relaxed">Soft-close telescopic channels, hydraulic hinges from Hafele and Hettich.</p>
+              </div>
+            </div>
+            <div className="bg-white rounded-2xl p-5 border border-green-100 shadow-sm flex items-start gap-4">
+              <Wrench className="w-8 h-8 text-forest shrink-0 mt-1" />
+              <div>
+                <h4 className="text-sm font-bold text-slate-800 mb-1">Expert Carpentry</h4>
+                <p className="text-slate-500 text-xs leading-relaxed">Supervised by Rajamouli Chary, ensuring perfect alignments and flawless joints.</p>
+              </div>
+            </div>
+            <div className="bg-white rounded-2xl p-5 border border-green-100 shadow-sm flex items-start gap-4">
+              <Clock className="w-8 h-8 text-forest shrink-0 mt-1" />
+              <div>
+                <h4 className="text-sm font-bold text-slate-800 mb-1">On-Time Handover</h4>
+                <p className="text-slate-500 text-xs leading-relaxed">Efficient project tracking to ensure delivery within the committed timeline.</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
       </div>
-
     </div>
   );
 }
