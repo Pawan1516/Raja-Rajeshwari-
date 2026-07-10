@@ -28,6 +28,8 @@ import './i18n';
 function AppLayout() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const isDetailsRoute = location.pathname.startsWith('/designs/');
+  const shouldHideBottomNav = isAdminRoute || isDetailsRoute;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -79,8 +81,8 @@ function AppLayout() {
       {/* India Service Coverage Section (Hidden on Admin Routes) */}
       {!isAdminRoute && <IndiaCoverage />}
 
-      {/* Mobile Bottom Navigation (Hidden on Admin Routes) */}
-      {!isAdminRoute && <MobileBottomNav />}
+      {/* Mobile Bottom Navigation (Hidden on Admin and Details Routes) */}
+      {!shouldHideBottomNav && <MobileBottomNav />}
 
       {/* Footer with business credentials */}
       <Footer />
