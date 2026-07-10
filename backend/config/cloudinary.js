@@ -20,15 +20,16 @@ if (
 
   storage = new CloudinaryStorage({
     cloudinary: cloudinary,
-    params: {
+    params: async (req, file) => ({
       folder: 'rliw_designs',
       allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-    },
+      transformation: [{ quality: 'auto', fetch_format: 'auto' }],
+    }),
   });
   isCloudinaryConfigured = true;
-  console.log('Cloudinary Storage Configured Successfully.');
+  console.log('✅ Cloudinary Storage Configured Successfully — images will upload to cloud.');
 } else {
-  console.log('Cloudinary credentials missing. Falling back to local file storage under backend/uploads/');
+  console.log('⚠️  Cloudinary credentials missing. Falling back to local file storage under backend/uploads/');
   const uploadDir = path.join(__dirname, '../uploads');
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
@@ -45,7 +46,20 @@ if (
   });
 }
 
-const upload = multer({ storage: storage });
+// File filter: only allow images
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only image files are allowed (JPG, PNG, WEBP)'), false);
+  }
+};
+
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20 MB max per file
+});
 
 module.exports = {
   upload,

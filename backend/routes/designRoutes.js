@@ -179,7 +179,7 @@ router.post('/', auth, upload.array('images', 10), async (req, res) => {
 // @desc    Update an existing design (Admin Only, Multi-image)
 // @access  Private (Admin Only)
 router.put('/:id', auth, upload.array('images', 10), async (req, res) => {
-  const { title_en, title_te, category, description_en, description_te, keepImages } = req.body;
+  const { title_en, title_te, category, description_en, description_te } = req.body;
   const designId = req.params.id;
 
   try {
@@ -203,10 +203,18 @@ router.put('/:id', auth, upload.array('images', 10), async (req, res) => {
     if (description_te !== undefined) design.description_te = description_te;
     if (req.body.workType) design.workType = req.body.workType;
 
-    // Handle images: Admin can specify which existing images to keep, and append new uploads
+    // Handle images: read existingImages field sent from frontend
+    // It may arrive as a JSON string (FormData) or an array
     let updatedImages = [];
-    if (keepImages) {
-      updatedImages = Array.isArray(keepImages) ? keepImages : [keepImages];
+    if (req.body.existingImages !== undefined) {
+      try {
+        const parsed = typeof req.body.existingImages === 'string'
+          ? JSON.parse(req.body.existingImages)
+          : req.body.existingImages;
+        updatedImages = Array.isArray(parsed) ? parsed : [parsed];
+      } catch {
+        updatedImages = design.images; // Fallback to current images on parse error
+      }
     } else {
       // If no explicit keep list is sent, default to keeping current images
       updatedImages = design.images;
@@ -243,6 +251,7 @@ router.put('/:id', auth, upload.array('images', 10), async (req, res) => {
     res.status(500).json({ message: 'Server error updating design' });
   }
 });
+
 
 // @route   DELETE /api/designs/:id
 // @desc    Delete a design
