@@ -12,7 +12,20 @@ const startServer = async () => {
   await connectDB();
 
   // Middleware
-  app.use(cors());
+  const corsOptions = {
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'https://raja-rajeshwari-239u.vercel.app',
+      // Allow any vercel preview deployments
+      /\.vercel\.app$/
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  };
+  app.use(cors(corsOptions));
+  app.options('*', cors(corsOptions)); // Pre-flight for all routes
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 

@@ -250,6 +250,23 @@ api.interceptors.request.use(
   }
 );
 
+// Response interceptor — handle 401 Unauthorized (expired/invalid token)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Token is invalid or expired — clear auth state and redirect to login
+      const isAdminRoute = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+      if (isAdminRoute && window.location.pathname !== '/admin/login') {
+        localStorage.removeItem('rliw_admin_token');
+        localStorage.removeItem('rliw_admin_user');
+        window.location.href = '/admin/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Response interceptor to intercept network failures and serve mock data in demo mode
 api.interceptors.response.use(
   (response) => response,

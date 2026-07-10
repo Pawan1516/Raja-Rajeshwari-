@@ -8,9 +8,14 @@ export const PHONE_DISPLAY_2 = '+91 91777 93710';
 export const TEL_LINK_2      = `tel:${PHONE_NUMBER_2}`;
 
 const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+// IMPORTANT: Set VITE_API_URL in your Vercel environment variables dashboard
+// pointing to your Render backend e.g. https://raja-rajeshwari-backend.onrender.com/api
 export const API_BASE_URL   = import.meta.env.VITE_API_URL 
   ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '') 
-  : (isLocal ? 'http://localhost:5000' : window.location.origin);
+  : (isLocal 
+      ? 'http://localhost:5000' 
+      : 'https://raja-rajeshwari-backend.onrender.com');  // ← Render backend fallback
 export const API_URL        = `${API_BASE_URL}/api`;
 
 /** Builds a WhatsApp deeplink with a pre-filled message for a design */
