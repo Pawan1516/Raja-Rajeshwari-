@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { 
   Plus, Edit2, Trash2, FolderPlus, Upload, X, Check, Loader, 
   AlertTriangle, Sparkles, Phone, MessageSquare, Users, Mail,
-  Home, Zap, Sun, FolderOpen, LogOut, LayoutDashboard, Globe
+  Home, Zap, Sun, FolderOpen, LogOut, LayoutDashboard, Globe, Search
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { authService, categoryService, designService, teamService, inquiryService } from '../services/api';
@@ -41,6 +41,7 @@ export default function AdminDashboard() {
 
   // View States
   const [activeTab, setActiveTab] = useState('interior'); // 'interior' | 'electrical' | 'lighting' | 'team' | 'categories' | 'inquiries'
+  const [searchQuery, setSearchQuery] = useState('');
   const [showDesignForm, setShowDesignForm] = useState(false);
   const [editingDesign, setEditingDesign] = useState(null);
   const [showCategoryForm, setShowCategoryForm] = useState(false);
@@ -568,7 +569,7 @@ export default function AdminDashboard() {
       {/* Tab Navigation Menu */}
       <div className="flex gap-x-6 gap-y-2 border-b border-slate-200 pb-px overflow-x-auto scrollbar-hide relative z-10">
         <button
-          onClick={() => { setActiveTab('interior'); handleDesignCancel(); setShowCategoryForm(false); setShowTeamForm(false); }}
+          onClick={() => { setActiveTab('interior'); handleDesignCancel(); setShowCategoryForm(false); setShowTeamForm(false); setSearchQuery(''); }}
           className={`pb-3 text-xs sm:text-sm font-bold border-b-2 transition-all px-1 whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'interior' ? 'border-amber-500 text-amber-600' : 'border-transparent text-slate-500 hover:text-slate-950'
           }`}
@@ -577,7 +578,7 @@ export default function AdminDashboard() {
           <span>Interior ({designs.filter(d => d.workType === 'interior' || !d.workType).length})</span>
         </button>
         <button
-          onClick={() => { setActiveTab('electrical'); handleDesignCancel(); setShowCategoryForm(false); setShowTeamForm(false); }}
+          onClick={() => { setActiveTab('electrical'); handleDesignCancel(); setShowCategoryForm(false); setShowTeamForm(false); setSearchQuery(''); }}
           className={`pb-3 text-xs sm:text-sm font-bold border-b-2 transition-all px-1 whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'electrical' ? 'border-yellow-500 text-yellow-605' : 'border-transparent text-slate-500 hover:text-slate-950'
           }`}
@@ -586,7 +587,7 @@ export default function AdminDashboard() {
           <span>Electrical ({designs.filter(d => d.workType === 'electrical').length})</span>
         </button>
         <button
-          onClick={() => { setActiveTab('lighting'); handleDesignCancel(); setShowCategoryForm(false); setShowTeamForm(false); }}
+          onClick={() => { setActiveTab('lighting'); handleDesignCancel(); setShowCategoryForm(false); setShowTeamForm(false); setSearchQuery(''); }}
           className={`pb-3 text-xs sm:text-sm font-bold border-b-2 transition-all px-1 whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'lighting' ? 'border-blue-500 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-950'
           }`}
@@ -598,7 +599,7 @@ export default function AdminDashboard() {
         <span className="border-l border-slate-200 my-2 self-stretch"></span>
 
         <button
-          onClick={() => { setActiveTab('team'); handleDesignCancel(); setShowCategoryForm(false); setShowTeamForm(false); }}
+          onClick={() => { setActiveTab('team'); handleDesignCancel(); setShowCategoryForm(false); setShowTeamForm(false); setSearchQuery(''); }}
           className={`pb-3 text-xs sm:text-sm font-bold border-b-2 transition-all px-1 whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'team' ? 'border-forest text-forest' : 'border-transparent text-slate-500 hover:text-slate-950'
           }`}
@@ -607,7 +608,7 @@ export default function AdminDashboard() {
           <span>Our Team ({teamMembers.length})</span>
         </button>
         <button
-          onClick={() => { setActiveTab('categories'); handleDesignCancel(); setShowCategoryForm(false); setShowTeamForm(false); }}
+          onClick={() => { setActiveTab('categories'); handleDesignCancel(); setShowCategoryForm(false); setShowTeamForm(false); setSearchQuery(''); }}
           className={`pb-3 text-xs sm:text-sm font-bold border-b-2 transition-all px-1 whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'categories' ? 'border-forest text-forest' : 'border-transparent text-slate-500 hover:text-slate-950'
           }`}
@@ -616,7 +617,7 @@ export default function AdminDashboard() {
           <span>Categories ({categories.length})</span>
         </button>
         <button
-          onClick={() => { setActiveTab('inquiries'); handleDesignCancel(); setShowCategoryForm(false); setShowTeamForm(false); }}
+          onClick={() => { setActiveTab('inquiries'); handleDesignCancel(); setShowCategoryForm(false); setShowTeamForm(false); setSearchQuery(''); }}
           className={`pb-3 text-xs sm:text-sm font-bold border-b-2 transition-all px-1 whitespace-nowrap flex items-center gap-2 ${
             activeTab === 'inquiries' ? 'border-forest text-forest' : 'border-transparent text-slate-500 hover:text-slate-950'
           }`}
@@ -624,6 +625,36 @@ export default function AdminDashboard() {
           <Mail className="w-4 h-4 text-blue-550" />
           <span>Inquiries ({inquiries.length})</span>
         </button>
+      </div>
+
+      {/* ─── SEARCH BOX ─── */}
+      <div className="relative z-10">
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+          <input
+            id="admin-search-box"
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={
+              activeTab === 'inquiries'
+                ? 'Search by name, email, phone, or message…'
+                : activeTab === 'categories'
+                ? 'Search categories by name…'
+                : 'Search by design ID, title, or category…'
+            }
+            className="w-full pl-11 pr-10 py-3 text-sm bg-white border border-slate-200 rounded-2xl shadow-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-forest/50 focus:ring-4 focus:ring-forest/10 focus:shadow-md transition-all"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all"
+              title="Clear search"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Team Member Creation/Edit Form Modal */}
@@ -1130,13 +1161,22 @@ export default function AdminDashboard() {
           lighting: { label: '💡 Lighting Works', emptyMsg: "No Lighting Works yet. Click 'Add Lighting Work' to begin.", filterFn: (d) => d.workType === 'lighting' },
         };
         const { label, emptyMsg, filterFn } = typeMap[activeTab];
-        const filtered = designs.filter(filterFn);
+        const q = searchQuery.toLowerCase().trim();
+        const filtered = designs.filter(filterFn).filter(d =>
+          !q ||
+          d.designId?.toLowerCase().includes(q) ||
+          d.title_en?.toLowerCase().includes(q) ||
+          d.title_te?.toLowerCase().includes(q) ||
+          (d.category && getLocalizedName(d.category).toLowerCase().includes(q))
+        );
 
         return (
           <div className="glass-card rounded-3xl border border-slate-100 shadow-premium overflow-hidden relative z-10">
             <div className="p-6 border-b border-slate-100 flex items-center justify-between">
               <h2 className="font-outfit font-extrabold text-lg text-slate-900">{label}</h2>
-              <span className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-bold">{filtered.length} Entries</span>
+              <span className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-bold">
+                {filtered.length}{searchQuery ? ` of ${designs.filter(filterFn).length}` : ''} Entries
+              </span>
             </div>
 
             {loading ? (
@@ -1367,9 +1407,13 @@ export default function AdminDashboard() {
 
       {/* Categories Listing */}
       {activeTab === 'categories' && (() => {
+        const q = searchQuery.toLowerCase().trim();
         const filteredCategories = categories.filter(cat => {
-          if (activeCategoryTab === 'all') return true;
-          return cat.workType === activeCategoryTab;
+          const matchesTab = activeCategoryTab === 'all' || cat.workType === activeCategoryTab;
+          const matchesSearch = !q ||
+            cat.name_en?.toLowerCase().includes(q) ||
+            cat.name_te?.toLowerCase().includes(q);
+          return matchesTab && matchesSearch;
         });
 
         return (
@@ -1377,7 +1421,9 @@ export default function AdminDashboard() {
             <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h2 className="font-outfit font-extrabold text-lg text-slate-900">Manage Design Categories</h2>
-                <p className="text-slate-450 text-xs mt-1">Showing {filteredCategories.length} categories</p>
+                <p className="text-slate-450 text-xs mt-1">
+                  Showing {filteredCategories.length}{searchQuery ? ` of ${categories.filter(c => activeCategoryTab === 'all' || c.workType === activeCategoryTab).length}` : ''} categories
+                </p>
               </div>
 
               {/* Sub-tabs for filtering categories */}
@@ -1519,11 +1565,24 @@ export default function AdminDashboard() {
       })()}
 
       {/* Inquiries Tab Panel */}
-      {activeTab === 'inquiries' && (
+      {activeTab === 'inquiries' && (() => {
+        const q = searchQuery.toLowerCase().trim();
+        const filteredInquiries = inquiries.filter(inq =>
+          !q ||
+          inq.name?.toLowerCase().includes(q) ||
+          inq.email?.toLowerCase().includes(q) ||
+          inq.phone?.toLowerCase().includes(q) ||
+          inq.message?.toLowerCase().includes(q) ||
+          inq.service?.toLowerCase().includes(q)
+        );
+
+        return (
         <div className="glass-card rounded-3xl border border-slate-100 shadow-premium overflow-hidden relative z-10">
           <div className="p-6 border-b border-slate-100 flex items-center justify-between">
             <h2 className="font-outfit font-extrabold text-lg text-slate-900">Contact Inquiries</h2>
-            <span className="text-xs bg-slate-100 text-slate-655 px-3 py-1 rounded-full font-bold">{inquiries.length} Messages</span>
+            <span className="text-xs bg-slate-100 text-slate-655 px-3 py-1 rounded-full font-bold">
+              {filteredInquiries.length}{searchQuery ? ` of ${inquiries.length}` : ''} Messages
+            </span>
           </div>
 
           {loading ? (
@@ -1531,13 +1590,13 @@ export default function AdminDashboard() {
               <Loader className="w-5 h-5 animate-spin text-wood" />
               <span>Loading inquiries...</span>
             </div>
-          ) : inquiries.length === 0 ? (
+          ) : filteredInquiries.length === 0 ? (
             <div className="p-12 text-center text-slate-400 italic">
-              No contact inquiries yet. Customers can submit messages from the Contact page.
+              {searchQuery ? `No inquiries match "${searchQuery}".` : 'No contact inquiries yet. Customers can submit messages from the Contact page.'}
             </div>
           ) : (
             <div className="divide-y divide-slate-100">
-              {inquiries.map((inq) => (
+              {filteredInquiries.map((inq) => (
                 <div key={inq._id} className={`p-6 flex flex-col md:flex-row md:items-start gap-5 transition-smooth ${inq.replied ? 'bg-slate-50/10' : 'bg-white'}`}>
                   {/* Status Badge */}
                   <div className="shrink-0 flex items-center gap-2">
@@ -1612,7 +1671,8 @@ export default function AdminDashboard() {
             </div>
           )}
         </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
