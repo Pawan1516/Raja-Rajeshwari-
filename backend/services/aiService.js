@@ -1,6 +1,23 @@
 const axios = require('axios');
 const fs = require('fs');
 
+// Promise timeout helper to prevent hanging on external API calls
+const withTimeout = (promise, ms) => {
+  let timeoutId;
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error(`Operation timed out after ${ms}ms`));
+    }, ms);
+  });
+  return Promise.race([
+    promise.then((res) => {
+      clearTimeout(timeoutId);
+      return res;
+    }),
+    timeoutPromise
+  ]);
+};
+
 // Stylized words for auto-generation
 const STYLES = ["Luxury", "Modern", "Premium", "Elegant", "Contemporary", "Minimalist", "Smart"];
 const SUFFIXES = ["Design", "Setup", "Interior"];
@@ -9,7 +26,7 @@ const SUFFIXES = ["Design", "Setup", "Interior"];
 const translateToTelugu = async (text) => {
   try {
     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=te&dt=t&q=${encodeURIComponent(text)}`;
-    const response = await axios.get(url);
+    const response = await axios.get(url, { timeout: 3500 }); // 3.5 seconds timeout limit
     if (response.data && response.data[0] && response.data[0][0] && response.data[0][0][0]) {
       return response.data[0][0][0];
     }
@@ -283,7 +300,10 @@ Respond with a valid JSON object ONLY (do not include markdown wrapping like \`\
   "workType": "one of: 'interior', 'electrical', 'lighting'"
 }`;
 
-      const result = await model.generateContent([promptText, imagePart]);
+      const result = await withTimeout(
+        model.generateContent([promptText, imagePart]),
+        8000 // 8 seconds timeout limit
+      );
       const textResponse = result.response.text().trim();
       
       // Attempt to clean JSON block if AI outputs markdown formatting

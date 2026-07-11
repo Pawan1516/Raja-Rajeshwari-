@@ -64,8 +64,24 @@ const processAndUploadImage = async (file) => {
       .toBuffer();
 
     if (isCloudinaryConfigured) {
-      // 2a. Upload WebP buffer to Cloudinary
-      return new Promise((resolve, reject) => {
+      // 2a. Upload WebP buffer to Cloudinary with timeout protection
+      const withTimeout = (promise, ms) => {
+        let timeoutId;
+        const timeoutPromise = new Promise((_, reject) => {
+          timeoutId = setTimeout(() => {
+            reject(new Error(`Operation timed out after ${ms}ms`));
+          }, ms);
+        });
+        return Promise.race([
+          promise.then((res) => {
+            clearTimeout(timeoutId);
+            return res;
+          }),
+          timeoutPromise
+        ]);
+      };
+
+      const cloudinaryPromise = new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
           {
             folder: 'rliw_designs',
@@ -84,6 +100,8 @@ const processAndUploadImage = async (file) => {
         );
         uploadStream.end(compressedBuffer);
       });
+
+      return await withTimeout(cloudinaryPromise, 15000); // 15 seconds timeout limit
     } else {
       // 2b. Save WebP buffer locally
       const uploadDir = path.join(__dirname, '../uploads');
