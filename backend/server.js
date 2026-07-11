@@ -1,4 +1,13 @@
 require('dotenv').config();
+
+// Production Crash Protection (Uncaught exception/rejection listeners)
+process.on('uncaughtException', (err) => {
+  console.error('❌ UNCAUGHT EXCEPTION:', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ UNHANDLED REJECTION AT:', promise, 'REASON:', reason);
+});
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -37,8 +46,8 @@ const startServer = async () => {
   };
   app.use(cors(corsOptions));
   app.options('*', cors(corsOptions)); // Pre-flight for all routes
-  app.use(express.json({ limit: '10mb' }));
-  app.use(express.urlencoded({ limit: '10mb', extended: true }));
+  app.use(express.json({ limit: '50mb' }));
+  app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
   // Serve Static Uploads Folder (For Local Storage Fallback)
   app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
