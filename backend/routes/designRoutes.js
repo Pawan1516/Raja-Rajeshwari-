@@ -127,12 +127,21 @@ router.post('/bulk', auth, upload.array('images', 20), async (req, res) => {
       const analysis = await analyzeImage(file.buffer, file.originalname);
 
       // 3. Apply Overrides if provided
-      let finalCategoryName = analysis.category;
-      let finalSubcategory = subcategoryOverride || analysis.subcategory;
+      const safeAnalysis = analysis || {
+        category: 'Living Room Interiors',
+        subcategory: 'Living Room Interior',
+        title_en: `Modern Setup ${file.originalname}`,
+        title_te: 'లివింగ్ రూమ్ ఇంటీరియర్',
+        workType: 'interior',
+        features: ['False Ceiling', 'Wooden Paneling', 'Modular Storage']
+      };
+
+      let finalCategoryName = safeAnalysis.category;
+      let finalSubcategory = subcategoryOverride || safeAnalysis.subcategory;
       let finalTitleEn = titleOverride
         ? `${titleOverride} - ${finalSubcategory}`
-        : analysis.title_en;
-      let finalWorkType = analysis.workType;
+        : safeAnalysis.title_en;
+      let finalWorkType = safeAnalysis.workType;
 
       // If manual category override is specified, get it from DB
       let categoryId;

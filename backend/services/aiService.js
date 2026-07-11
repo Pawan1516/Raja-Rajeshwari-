@@ -324,6 +324,8 @@ Respond with a valid JSON object ONLY (do not include markdown wrapping like \`\
           features: parsed.features || [],
           workType: parsed.workType || 'interior'
         };
+      } else {
+        console.warn('⚠️ Gemini AI JSON response missing required fields (category/title_en). Falling back to local rules.');
       }
     } catch (err) {
       console.error('❌ Gemini Vision AI Analysis failed. Falling back to local rules:', err.message);
