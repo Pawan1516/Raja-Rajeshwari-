@@ -3,6 +3,9 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const sharp = require('sharp');
+// Tuned for memory-constrained free-tier hosting (Render 512MB RAM limit)
+sharp.cache(false);
+sharp.concurrency(1);
 const crypto = require('crypto');
 
 let isCloudinaryConfigured = false;

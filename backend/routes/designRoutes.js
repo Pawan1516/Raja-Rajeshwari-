@@ -108,7 +108,7 @@ router.get('/:id', async (req, res) => {
 // @route   POST /api/designs/bulk
 // @desc    Bulk create designs (Admin Only)
 // @access  Private (Admin Only)
-router.post('/bulk', auth, upload.array('images', 100), async (req, res) => {
+router.post('/bulk', auth, upload.array('images', 20), async (req, res) => {
   const { categoryOverride, subcategoryOverride, titleOverride } = req.body;
 
   if (!req.files || req.files.length === 0) {
