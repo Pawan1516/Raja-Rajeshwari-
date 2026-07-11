@@ -37,8 +37,8 @@ const startServer = async () => {
   };
   app.use(cors(corsOptions));
   app.options('*', cors(corsOptions)); // Pre-flight for all routes
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+  app.use(express.json({ limit: '10mb' }));
+  app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
   // Serve Static Uploads Folder (For Local Storage Fallback)
   app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
