@@ -183,12 +183,12 @@ router.post('/bulk', auth, upload.array('images', 20), async (req, res) => {
         const { translateToTelugu } = require('../services/aiService');
         finalTitleTe = await translateToTelugu(finalTitleEn);
       } else {
-        finalTitleTe = analysis.title_te;
+        finalTitleTe = safeAnalysis.title_te;
       }
 
       // 5. Generate features based on category type
-      const finalFeatures = analysis.features && analysis.features.length > 0
-        ? analysis.features
+      const finalFeatures = safeAnalysis.features && safeAnalysis.features.length > 0
+        ? safeAnalysis.features
         : (finalWorkType === 'electrical'
             ? ['Safe Wiring', 'Load Protection', 'Energy Efficient']
             : finalWorkType === 'lighting'
