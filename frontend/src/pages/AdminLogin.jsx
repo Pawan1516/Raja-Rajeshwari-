@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Lock, User, AlertCircle, Loader, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -8,18 +8,29 @@ import { authService } from '../services/api';
 export default function AdminLogin() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [sessionExpiredMsg, setSessionExpiredMsg] = useState('');
 
-  // If already authenticated, redirect to dashboard
+  // Handle session expired redirect messages
   useEffect(() => {
-    if (authService.isAuthenticated()) {
+    if (location.state?.message) {
+      setSessionExpiredMsg(location.state.message);
+      // Clear route state history so manual reload hides the message
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
+
+  // If already authenticated and not showing an expiry warning, redirect to dashboard
+  useEffect(() => {
+    if (authService.isAuthenticated() && !location.state?.message) {
       navigate('/admin/dashboard');
     }
-  }, [navigate]);
+  }, [navigate, location]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,6 +41,7 @@ export default function AdminLogin() {
 
     setLoading(true);
     setError('');
+    setSessionExpiredMsg(''); // Clear session messages on submission
     
     try {
       await authService.login(username, password);
@@ -72,6 +84,17 @@ export default function AdminLogin() {
             {t('common.admin_panel')}
           </p>
         </div>
+
+        {sessionExpiredMsg && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-2 bg-amber-900/30 border border-amber-500/30 text-amber-300 p-4 rounded-xl text-xs font-semibold mb-6"
+          >
+            <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
+            <span>{sessionExpiredMsg}</span>
+          </motion.div>
+        )}
 
         {error && (
           <motion.div 

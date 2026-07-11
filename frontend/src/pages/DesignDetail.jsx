@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { MessageSquare, Phone, ArrowLeft, Calendar, Tag, Sparkles } from 'lucide-react';
 import { designService } from '../services/api';
-import { TEL_LINK, buildWALink } from '../constants';
+import { TEL_LINK, buildWALink, API_BASE_URL } from '../constants';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
@@ -41,13 +41,22 @@ export default function DesignDetail() {
     return i18n.language === 'te' ? item.title_te : item.title_en;
   };
 
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80';
+    let url = imagePath;
+    if (imagePath.startsWith('/uploads')) {
+      url = `${API_BASE_URL}${imagePath}`;
+    }
+    return `${url}?t=${Date.now()}`;
+  };
+
   const getWhatsAppLink = () => {
     if (!design) return '#';
     return buildWALink({
       designId: design.designId,
       categoryName: design.category ? getLocalizedName(design.category) : '',
       title: getLocalizedTitle(design),
-      imageUrl: design.images?.[activeImageIndex] ?? design.images?.[0] ?? ''
+      imageUrl: getImageUrl(design.images?.[activeImageIndex] ?? design.images?.[0])
     });
   };
 
@@ -118,7 +127,7 @@ export default function DesignDetail() {
           >
             <div className="aspect-[4/3] rounded-3xl overflow-hidden shadow-premium border border-slate-100 bg-slate-50 relative">
               <img
-                src={design.images[activeImageIndex] || design.images[0]}
+                src={getImageUrl(design.images[activeImageIndex] || design.images[0])}
                 alt={localizedTitle}
                 className="w-full h-full object-cover transition-all duration-400"
               />
@@ -136,7 +145,7 @@ export default function DesignDetail() {
                     onClick={() => setActiveImageIndex(idx)}
                     className={`w-20 sm:w-24 aspect-[4/3] rounded-xl overflow-hidden border-2 shrink-0 transition-smooth ${activeImageIndex === idx ? 'border-wood shadow-md' : 'border-transparent opacity-60 hover:opacity-100'}`}
                   >
-                    <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                    <img src={getImageUrl(img)} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>

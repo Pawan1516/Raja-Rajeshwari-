@@ -6,7 +6,7 @@ import { Search, Filter, MessageSquare, Phone, AlertCircle, Sparkles, X } from '
 
 const InteriorShowcase3D = lazy(() => import('../components/InteriorShowcase3D'));
 import { designService, categoryService } from '../services/api';
-import { TEL_LINK, buildWALink } from '../constants';
+import { TEL_LINK, buildWALink, API_BASE_URL } from '../constants';
 
 const cardVariant = {
   hidden: { opacity: 0, y: 24 },
@@ -87,12 +87,21 @@ export default function DesignListing() {
   const getLocalizedName = (item) => i18n.language === 'te' ? item.name_te : item.name_en;
   const getLocalizedTitle = (item) => i18n.language === 'te' ? item.title_te : item.title_en;
 
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80';
+    let url = imagePath;
+    if (imagePath.startsWith('/uploads')) {
+      url = `${API_BASE_URL}${imagePath}`;
+    }
+    return `${url}?t=${Date.now()}`;
+  };
+
   const getWhatsAppLink = (design) => {
     return buildWALink({
       designId: design.designId,
       categoryName: design.category ? getLocalizedName(design.category) : '',
       title: getLocalizedTitle(design),
-      imageUrl: design.images?.[0] ?? ''
+      imageUrl: getImageUrl(design.images?.[0])
     });
   };
 
@@ -151,7 +160,7 @@ export default function DesignListing() {
     >
       <div className="relative aspect-[4/3] bg-slate-50 overflow-hidden shrink-0">
         <img
-          src={design.images[0]}
+          src={getImageUrl(design.images?.[0])}
           alt={getLocalizedTitle(design)}
           className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
           loading="lazy"

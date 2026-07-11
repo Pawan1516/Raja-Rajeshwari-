@@ -3,7 +3,7 @@ const router = express.Router();
 const Design = require('../models/Design');
 const Category = require('../models/Category');
 const auth = require('../middleware/auth');
-const { upload, isCloudinaryConfigured } = require('../config/cloudinary');
+const { upload, isCloudinaryConfigured, processAndUploadImage } = require('../config/cloudinary');
 const fs = require('fs');
 const path = require('path');
 const cloudinary = require('cloudinary').v2;
@@ -120,11 +120,11 @@ router.post('/bulk', auth, upload.array('images', 100), async (req, res) => {
 
   try {
     for (const file of req.files) {
-      // 1. Resolve image url
-      const imageUrl = isCloudinaryConfigured ? file.path : `/uploads/${file.filename}`;
+      // 1. Resolve image url by compressing and uploading
+      const imageUrl = await processAndUploadImage(file);
 
-      // 2. Perform AI Vision/Logic analysis
-      const analysis = await analyzeImage(imageUrl, file.originalname);
+      // 2. Perform AI Vision/Logic analysis using in-memory buffer
+      const analysis = await analyzeImage(file.buffer, file.originalname);
 
       // 3. Apply Overrides if provided
       let finalCategoryName = analysis.category;
@@ -233,13 +233,9 @@ router.post('/', auth, upload.array('images', 10), async (req, res) => {
     // Process uploaded images
     let imageUrls = [];
     if (req.files && req.files.length > 0) {
-      imageUrls = req.files.map(file => {
-        if (isCloudinaryConfigured) {
-          return file.path;
-        } else {
-          return `/uploads/${file.filename}`;
-        }
-      });
+      imageUrls = await Promise.all(
+        req.files.map(file => processAndUploadImage(file))
+      );
     }
 
     // Support URL text strings as manual input fallback if needed
@@ -330,13 +326,9 @@ router.put('/:id', auth, upload.array('images', 10), async (req, res) => {
 
     // Append newly uploaded images
     if (req.files && req.files.length > 0) {
-      const newUrls = req.files.map(file => {
-        if (isCloudinaryConfigured) {
-          return file.path;
-        } else {
-          return `/uploads/${file.filename}`;
-        }
-      });
+      const newUrls = await Promise.all(
+        req.files.map(file => processAndUploadImage(file))
+      );
       updatedImages = [...updatedImages, ...newUrls];
     }
 

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const TeamMember = require('../models/TeamMember');
 const auth = require('../middleware/auth');
-const { upload, isCloudinaryConfigured } = require('../config/cloudinary');
+const { upload, isCloudinaryConfigured, processAndUploadImage } = require('../config/cloudinary');
 
 // @route   GET /api/team
 // @desc    Get all team members
@@ -30,11 +30,7 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
 
     let imageUrl = '';
     if (req.file) {
-      if (isCloudinaryConfigured) {
-        imageUrl = req.file.path; // Cloudinary URL
-      } else {
-        imageUrl = `/uploads/${req.file.filename}`; // Local path URL
-      }
+      imageUrl = await processAndUploadImage(req.file);
     } else {
       imageUrl = req.body.image || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400&q=80';
     }
@@ -88,11 +84,7 @@ router.put('/:id', auth, upload.single('image'), async (req, res) => {
     if (exp) member.exp = exp;
 
     if (req.file) {
-      if (isCloudinaryConfigured) {
-        member.image = req.file.path;
-      } else {
-        member.image = `/uploads/${req.file.filename}`;
-      }
+      member.image = await processAndUploadImage(req.file);
     }
 
     await member.save();

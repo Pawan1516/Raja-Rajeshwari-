@@ -11,6 +11,10 @@ const AdminSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  image: {
+    type: String,
+    default: '/uploads/admin-avatar.png',
+  },
 }, { timestamps: true });
 
 // Hash password before saving

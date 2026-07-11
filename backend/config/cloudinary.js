@@ -1,10 +1,10 @@
 const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const sharp = require('sharp');
+const crypto = require('crypto');
 
-let storage;
 let isCloudinaryConfigured = false;
 
 if (
@@ -17,51 +17,91 @@ if (
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
   });
-
-  storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: async (req, file) => ({
-      folder: 'rliw_designs',
-      allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-      transformation: [{ quality: 'auto', fetch_format: 'auto' }],
-    }),
-  });
   isCloudinaryConfigured = true;
   console.log('✅ Cloudinary Storage Configured Successfully — images will upload to cloud.');
 } else {
-  console.log('⚠️  Cloudinary credentials missing. Falling back to local file storage under backend/uploads/');
-  const uploadDir = path.join(__dirname, '../uploads');
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-  }
-
-  storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-      cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-    },
-  });
+  console.log('⚠️  Cloudinary credentials missing. Falling back to local WebP file storage under backend/uploads/');
 }
 
 // File filter: only allow images
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image/')) {
+  const allowedTypes = /jpeg|jpg|png|webp|gif/;
+  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = allowedTypes.test(file.mimetype);
+
+  if (mimetype && extname) {
     cb(null, true);
   } else {
-    cb(new Error('Only image files are allowed (JPG, PNG, WEBP)'), false);
+    cb(new Error('Only image files are allowed (JPG, JPEG, PNG, WEBP, GIF)'), false);
   }
 };
 
+// Use memoryStorage to process files via sharp before saving
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   fileFilter,
-  limits: { fileSize: 20 * 1024 * 1024 }, // 20 MB max per file
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB max per file upload limit
 });
+
+/**
+ * Compresses an image file buffer, converts to WebP, and saves to Cloudinary or Local uploads
+ * @param {Object} file - The file object from Multer (memoryStorage)
+ * @returns {Promise<string>} - Resolved image URL/path
+ */
+const processAndUploadImage = async (file) => {
+  if (!file || !file.buffer) {
+    throw new Error('No file buffer available for processing');
+  }
+
+  // Generate unique filename: timestamp + UUID + .webp
+  const filename = `${Date.now()}-${crypto.randomUUID()}.webp`;
+
+  try {
+    // 1. Process image using sharp: convert to webp, resize to max-width 1024px, quality 65
+    const compressedBuffer = await sharp(file.buffer)
+      .resize({ width: 1024, withoutEnlargement: true })
+      .webp({ quality: 65 })
+      .toBuffer();
+
+    if (isCloudinaryConfigured) {
+      // 2a. Upload WebP buffer to Cloudinary
+      return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'rliw_designs',
+            public_id: path.parse(filename).name,
+            format: 'webp',
+            resource_type: 'image',
+          },
+          (error, result) => {
+            if (error) {
+              console.error('Cloudinary buffer upload error:', error);
+              reject(error);
+            } else {
+              resolve(result.secure_url);
+            }
+          }
+        );
+        uploadStream.end(compressedBuffer);
+      });
+    } else {
+      // 2b. Save WebP buffer locally
+      const uploadDir = path.join(__dirname, '../uploads');
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      const filepath = path.join(uploadDir, filename);
+      await fs.promises.writeFile(filepath, compressedBuffer);
+      return `/uploads/${filename}`;
+    }
+  } catch (err) {
+    console.error('Error during image processing:', err);
+    throw new Error(`Failed to process and store image: ${err.message}`);
+  }
+};
 
 module.exports = {
   upload,
   isCloudinaryConfigured,
+  processAndUploadImage,
 };

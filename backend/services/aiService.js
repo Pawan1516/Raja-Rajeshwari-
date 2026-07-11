@@ -211,7 +211,9 @@ const analyzeImage = async (filePath, originalName) => {
       const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
       const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
       let imageBuffer;
-      if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+      if (Buffer.isBuffer(filePath)) {
+        imageBuffer = filePath;
+      } else if (typeof filePath === 'string' && (filePath.startsWith('http://') || filePath.startsWith('https://'))) {
         const response = await axios.get(filePath, { responseType: 'arraybuffer' });
         imageBuffer = Buffer.from(response.data);
       } else {

@@ -6,20 +6,31 @@ const connectDB = require('./config/db');
 
 // Initialize app
 const app = express();
+app.set('trust proxy', 1); // Configure Express to trust reverse proxy headers
 
 const startServer = async () => {
   // Connect Database
   await connectDB();
 
   // Middleware
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'https://raja-rajeshwari-239u.vercel.app'
+  ];
+
   const corsOptions = {
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'https://raja-rajeshwari-239u.vercel.app',
-      // Allow any vercel preview deployments
-      /\.vercel\.app$/
-    ],
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl, or Postman)
+      if (!origin) return callback(null, true);
+
+      const isAllowed = allowedOrigins.includes(origin) || /\.vercel\.app$/.test(origin);
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -38,6 +49,7 @@ const startServer = async () => {
   app.use('/api/designs', require('./routes/designRoutes'));
   app.use('/api/team', require('./routes/teamRoutes'));
   app.use('/api/inquiries', require('./routes/inquiryRoutes'));
+  app.use('/api/visitors', require('./routes/visitorRoutes'));
 
   // Serve Frontend Static Files in Production (Frontend is built in ../frontend/dist)
   const distPath = path.join(__dirname, '../frontend/dist');
@@ -56,12 +68,19 @@ const startServer = async () => {
     }
   });
 
-  // Error handling middleware
+  // Error handling middleware (hardened to prevent internal info leakage)
   app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({
-      message: err.message || 'Internal Server Error',
-      error: process.env.NODE_ENV === 'production' ? {} : err
+    // Log the full stack trace server-side
+    console.error('Unhandled Server Error:', err);
+
+    const status = err.status || 500;
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    res.status(status).json({
+      error: status === 429 ? 'Too Many Requests' : 'Internal Server Error',
+      message: isProduction
+        ? 'An unexpected error occurred. Please contact support.'
+        : err.message || 'Something went wrong.'
     });
   });
 

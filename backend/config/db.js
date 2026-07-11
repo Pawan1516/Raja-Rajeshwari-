@@ -73,17 +73,21 @@ const autoSeed = async () => {
     const Category = require('../models/Category');
     const TeamMember = require('../models/TeamMember');
 
-    const adminExists = await Admin.findOne({ username: 'Rajamoulichary' });
+    const defaultUsername = process.env.DEFAULT_ADMIN_USERNAME || 'Rajamoulichary';
+    const defaultPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'Rajamoulichary@779';
+
+    const adminExists = await Admin.findOne({ username: defaultUsername });
     if (!adminExists) {
-      console.log('Seeding admin user account for Rajamoulichary...');
+      console.log(`Seeding admin user account for ${defaultUsername}...`);
       const adminUser = new Admin({
-        username: 'Rajamoulichary',
-        password: 'Rajamoulichary@779'
+        username: defaultUsername,
+        password: defaultPassword,
+        image: '/uploads/admin-avatar.png'
       });
       await adminUser.save();
-      console.log('Created Admin account successfully. (User: Rajamoulichary, Pass: Rajamoulichary@779)');
+      console.log(`Created Admin account successfully. (User: ${defaultUsername})`);
     } else {
-      console.log('Admin account Rajamoulichary already exists.');
+      console.log(`Admin account ${defaultUsername} already exists.`);
     }
 
     // Seed deduplicated categories list
@@ -122,13 +126,13 @@ const autoSeed = async () => {
         role: 'Founder & Head Carpentry Craftsman',
         role_te: 'స్థాపకుడు & ప్రధాన వడ్రంగి హస్తకళాకారుడు',
         exp: '25+ Years',
-        image: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=400&q=80'
+        image: '/uploads/owner.jpg'
       });
       await newHead.save();
       console.log('Created default team member profile for Rajamouli Chary.');
     } else {
-      if (defaultHead.image !== 'https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=400&q=80') {
-        defaultHead.image = 'https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=400&q=80';
+      if (defaultHead.image !== '/uploads/owner.jpg') {
+        defaultHead.image = '/uploads/owner.jpg';
         await defaultHead.save();
         console.log('Updated default team member profile image for Rajamouli Chary.');
       }

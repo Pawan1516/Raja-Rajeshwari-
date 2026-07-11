@@ -40,10 +40,11 @@ export default function OurTeam() {
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return 'https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=400&q=80';
+    let url = imagePath;
     if (imagePath.startsWith('/uploads')) {
-      return `${API_BASE_URL}${imagePath}`;
+      url = `${API_BASE_URL}${imagePath}`;
     }
-    return imagePath;
+    return `${url}?t=${Date.now()}`;
   };
 
   return (

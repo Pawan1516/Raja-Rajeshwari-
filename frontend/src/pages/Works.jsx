@@ -44,10 +44,11 @@ export default function Works() {
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80';
+    let url = imagePath;
     if (imagePath.startsWith('/uploads')) {
-      return `${API_BASE_URL}${imagePath}`;
+      url = `${API_BASE_URL}${imagePath}`;
     }
-    return imagePath;
+    return `${url}?t=${Date.now()}`;
   };
 
   // Filter projects by matching category name

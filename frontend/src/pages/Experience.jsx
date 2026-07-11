@@ -40,10 +40,11 @@ export default function Experience() {
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return '/owner.jpg';
+    let url = imagePath;
     if (imagePath.startsWith('/uploads')) {
-      return `${API_BASE_URL}${imagePath}`;
+      url = `${API_BASE_URL}${imagePath}`;
     }
-    return imagePath;
+    return `${url}?t=${Date.now()}`;
   };
 
   const stats = [

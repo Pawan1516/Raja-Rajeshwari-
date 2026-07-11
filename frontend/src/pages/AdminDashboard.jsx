@@ -7,7 +7,7 @@ import {
   Home, Zap, Sun, FolderOpen, LogOut, LayoutDashboard, Globe, Search
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { authService, categoryService, designService, teamService, inquiryService } from '../services/api';
+import { authService, categoryService, designService, teamService, inquiryService, visitorService } from '../services/api';
 import { API_BASE_URL } from '../constants';
 import { createLuminanceDepthMap } from '../utils/depthMapGenerator';
 
@@ -35,12 +35,14 @@ export default function AdminDashboard() {
   const [categories, setCategories] = useState([]);
   const [teamMembers, setTeamMembers] = useState([]);
   const [inquiries, setInquiries] = useState([]);
+  const [visitors, setVisitors] = useState([]);
+  const [visitorStats, setVisitorStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [feedback, setFeedback] = useState({ type: '', message: '' });
 
   // View States
-  const [activeTab, setActiveTab] = useState('interior'); // 'interior' | 'electrical' | 'lighting' | 'team' | 'categories' | 'inquiries'
+  const [activeTab, setActiveTab] = useState('interior'); // 'interior' | 'electrical' | 'lighting' | 'team' | 'categories' | 'inquiries' | 'visitors'
   const [searchQuery, setSearchQuery] = useState('');
   const [showDesignForm, setShowDesignForm] = useState(false);
   const [editingDesign, setEditingDesign] = useState(null);
@@ -193,16 +195,22 @@ export default function AdminDashboard() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [cats, ds, team, inqs] = await Promise.all([
+      const [cats, ds, team, inqs, visitorData] = await Promise.all([
         categoryService.getAll(),
         designService.getAll(),
         teamService.getAll(),
-        inquiryService.getAll()
+        inquiryService.getAll(),
+        visitorService.getVisitors().catch(err => {
+          console.error('Error pre-fetching visitors:', err);
+          return { visitors: [], stats: null };
+        })
       ]);
       setCategories(cats);
       setDesigns(ds);
       setTeamMembers(team);
       setInquiries(inqs);
+      setVisitors(visitorData?.visitors || []);
+      setVisitorStats(visitorData?.stats || null);
     } catch (err) {
       console.error(err);
       setFeedback({ type: 'error', message: 'Failed to retrieve records from the API.' });
@@ -504,10 +512,11 @@ export default function AdminDashboard() {
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return 'https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=400&q=80';
+    let url = imagePath;
     if (imagePath.startsWith('/uploads')) {
-      return `${API_BASE_URL}${imagePath}`;
+      url = `${API_BASE_URL}${imagePath}`;
     }
-    return imagePath;
+    return `${url}?t=${Date.now()}`;
   };
 
   return (
@@ -609,7 +618,7 @@ export default function AdminDashboard() {
       )}
 
       {/* Stats Summary Panel */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 relative z-10">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 relative z-10">
         <div className="glass-card p-5 rounded-2xl border border-slate-100 shadow-premium flex items-center gap-4 hover:scale-[1.02] transition-premium">
           <div className="p-3 bg-amber-50 rounded-xl text-amber-600">
             <Sparkles className="w-6 h-6 animate-pulse" />
@@ -649,6 +658,16 @@ export default function AdminDashboard() {
           <div>
             <span className="text-slate-450 text-[10px] sm:text-xs font-bold uppercase tracking-wider block">Team Members</span>
             <span className="text-slate-900 text-xl sm:text-2xl font-extrabold font-outfit">{teamMembers.length}</span>
+          </div>
+        </div>
+
+        <div className="glass-card p-5 rounded-2xl border border-slate-100 shadow-premium flex items-center gap-4 hover:scale-[1.02] transition-premium">
+          <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600">
+            <Globe className="w-6 h-6 animate-spin-slow" />
+          </div>
+          <div>
+            <span className="text-slate-450 text-[10px] sm:text-xs font-bold uppercase tracking-wider block">Live Traffic</span>
+            <span className="text-slate-900 text-xl sm:text-2xl font-extrabold font-outfit">{visitors.length}</span>
           </div>
         </div>
       </div>
@@ -712,6 +731,15 @@ export default function AdminDashboard() {
           <Mail className="w-4 h-4 text-blue-550" />
           <span>Inquiries ({inquiries.length})</span>
         </button>
+        <button
+          onClick={() => { setActiveTab('visitors'); handleDesignCancel(); setShowCategoryForm(false); setShowTeamForm(false); setSearchQuery(''); }}
+          className={`pb-3 text-xs sm:text-sm font-bold border-b-2 transition-all px-1 whitespace-nowrap flex items-center gap-2 ${
+            activeTab === 'visitors' ? 'border-forest text-forest' : 'border-transparent text-slate-500 hover:text-slate-950'
+          }`}
+        >
+          <Globe className="w-4 h-4 text-emerald-500" />
+          <span>Visitors ({visitors.length})</span>
+        </button>
       </div>
 
       {/* ─── SEARCH BOX ─── */}
@@ -728,6 +756,8 @@ export default function AdminDashboard() {
                 ? 'Search by name, email, phone, or message…'
                 : activeTab === 'categories'
                 ? 'Search categories by name…'
+                : activeTab === 'visitors'
+                ? 'Search visitors by IP or browser agent…'
                 : 'Search by design ID, title, or category…'
             }
             className="w-full pl-11 pr-10 py-3 text-sm bg-white border border-slate-200 rounded-2xl shadow-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-forest/50 focus:ring-4 focus:ring-forest/10 focus:shadow-md transition-all"
@@ -1023,7 +1053,7 @@ export default function AdminDashboard() {
                       {bulkProcessedResults.map((design, idx) => (
                         <div key={idx} className="bg-slate-50 border border-slate-100 rounded-xl p-3 flex gap-3 items-center shadow-sm">
                           <img 
-                            src={design.images?.[0]} 
+                            src={getImageUrl(design.images?.[0])} 
                             alt="Preview" 
                             className="w-12 h-10 object-cover rounded-lg bg-slate-200 shrink-0" 
                           />
@@ -1493,7 +1523,7 @@ export default function AdminDashboard() {
                           <td className="p-5">
                             <div className="w-14 h-10 rounded-lg overflow-hidden border border-slate-200 bg-slate-50">
                               <img
-                                src={design.images[0] || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=80&q=80'}
+                                src={getImageUrl(design.images?.[0])}
                                 alt="preview"
                                 className="w-full h-full object-cover"
                               />
@@ -1534,7 +1564,7 @@ export default function AdminDashboard() {
                     <div key={design._id} className="p-5 flex gap-4 hover:bg-slate-50/40 transition-smooth">
                       <div className="w-20 h-16 rounded-xl overflow-hidden border border-slate-200 shrink-0 bg-slate-50">
                         <img
-                          src={design.images[0] || 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=80&q=80'}
+                          src={getImageUrl(design.images?.[0])}
                           alt="preview"
                           className="w-full h-full object-cover"
                         />
@@ -1956,6 +1986,221 @@ export default function AdminDashboard() {
             </div>
           )}
         </div>
+        );
+      })()}
+
+      {/* Visitors & Traffic Analytics Tab Panel */}
+      {activeTab === 'visitors' && (() => {
+        const q = searchQuery.toLowerCase().trim();
+        const filteredVisitors = visitors.filter(v =>
+          !q ||
+          v.ip?.toLowerCase().includes(q) ||
+          v.userAgent?.toLowerCase().includes(q) ||
+          (v.referrer && v.referrer.toLowerCase().includes(q))
+        );
+
+        return (
+          <div className="space-y-6 animate-fade-in relative z-10">
+            {/* Analytics Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 rounded-3xl p-6 shadow-sm flex items-center gap-4">
+                <div className="p-4 bg-emerald-500 text-white rounded-2xl">
+                  <Globe className="w-6 h-6" />
+                </div>
+                <div>
+                  <span className="text-xs text-slate-500 font-bold block uppercase tracking-wider">Unique Sessions</span>
+                  <span className="text-2xl font-extrabold font-outfit text-slate-900">{visitorStats?.uniqueVisitors || 0}</span>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-3xl p-6 shadow-sm flex items-center gap-4">
+                <div className="p-4 bg-blue-500 text-white rounded-2xl">
+                  <FolderOpen className="w-6 h-6" />
+                </div>
+                <div>
+                  <span className="text-xs text-slate-500 font-bold block uppercase tracking-wider">Total Page Views</span>
+                  <span className="text-2xl font-extrabold font-outfit text-slate-900">{visitorStats?.totalPageViews || 0}</span>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-purple-50 to-fuchsia-50 border border-purple-100 rounded-3xl p-6 shadow-sm flex items-center gap-4">
+                <div className="p-4 bg-purple-500 text-white rounded-2xl">
+                  <Sparkles className="w-6 h-6 animate-pulse" />
+                </div>
+                <div>
+                  <span className="text-xs text-slate-500 font-bold block uppercase tracking-wider font-sans">Pages Per User</span>
+                  <span className="text-2xl font-extrabold font-outfit text-slate-900">{visitorStats?.averageViewsPerSession || 0}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Popular Pages & Referrers Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="glass-card rounded-3xl border border-slate-100 p-6 shadow-premium bg-white">
+                <h3 className="font-outfit font-extrabold text-sm text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2 flex items-center gap-1.5">
+                  <span>🔥 Most Visited Pages</span>
+                </h3>
+                {!visitorStats || visitorStats.popularPages?.length === 0 ? (
+                  <p className="text-xs text-slate-400 italic">No traffic logged yet.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {visitorStats.popularPages.map((page, idx) => (
+                      <div key={idx} className="flex items-center justify-between text-xs font-sans">
+                        <span className="font-bold text-slate-600 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100 truncate max-w-[15rem] md:max-w-[20rem]">
+                          {page.path}
+                        </span>
+                        <span className="font-extrabold text-forest bg-forest-light/10 px-2 py-0.5 rounded">
+                          {page.count} views
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="glass-card rounded-3xl border border-slate-100 p-6 shadow-premium bg-white">
+                <h3 className="font-outfit font-extrabold text-sm text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2 flex items-center gap-1.5">
+                  <span>🗺️ Main Referring Origins</span>
+                </h3>
+                {(() => {
+                  const referrers = {};
+                  visitors.forEach(v => {
+                    if (v.referrer) {
+                      const domain = v.referrer.replace('https://', '').replace('http://', '').split('/')[0];
+                      referrers[domain] = (referrers[domain] || 0) + 1;
+                    }
+                  });
+                  const list = Object.entries(referrers)
+                    .map(([domain, count]) => ({ domain, count }))
+                    .sort((a, b) => b.count - a.count)
+                    .slice(0, 5);
+
+                  if (list.length === 0) {
+                    return <p className="text-xs text-slate-400 italic">No referrer details logged (Direct visits).</p>;
+                  }
+
+                  return (
+                    <div className="space-y-3">
+                      {list.map((ref, idx) => (
+                        <div key={idx} className="flex items-center justify-between text-xs font-sans">
+                          <span className="font-bold text-slate-605 truncate max-w-[15rem]">{ref.domain}</span>
+                          <span className="font-extrabold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                            {ref.count} sessions
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+
+            {/* Detailed Sessions Table */}
+            <div className="glass-card rounded-3xl border border-slate-100 shadow-premium overflow-hidden bg-white">
+              <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                <h2 className="font-outfit font-extrabold text-lg text-slate-900 font-sans">Traffic Log Sessions</h2>
+                <span className="text-xs bg-slate-100 text-slate-655 px-3 py-1 rounded-full font-bold">
+                  {filteredVisitors.length} Active Sessions
+                </span>
+              </div>
+
+              {filteredVisitors.length === 0 ? (
+                <div className="p-12 text-center text-slate-400 italic">
+                  {searchQuery ? `No sessions match "${searchQuery}".` : 'No visitor activity recorded.'}
+                </div>
+              ) : (
+                <>
+                  {/* Desktop Table */}
+                  <div className="hidden md:block overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-sm">
+                      <thead>
+                        <tr className="bg-slate-50/50 border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                          <th className="p-5 font-sans">IP Address</th>
+                          <th className="p-5 font-sans">Referrer</th>
+                          <th className="p-5 font-sans">Browser / Device Agent</th>
+                          <th className="p-5 font-sans text-center">Views</th>
+                          <th className="p-5 font-sans">Visited Pages History</th>
+                          <th className="p-5 font-sans text-right">Last Visit</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 text-slate-700 font-sans text-xs">
+                        {filteredVisitors.map((v) => (
+                          <tr key={v._id} className="hover:bg-slate-50/40 transition-smooth">
+                            <td className="p-5 font-bold text-slate-900 font-mono">{v.ip}</td>
+                            <td className="p-5">
+                              {v.referrer ? (
+                                <span className="text-slate-600 truncate max-w-[10rem] block font-semibold" title={v.referrer}>
+                                  {v.referrer.replace('https://', '').replace('http://', '')}
+                                </span>
+                              ) : (
+                                <span className="text-slate-400 italic">Direct Link</span>
+                              )}
+                            </td>
+                            <td className="p-5 text-slate-500 font-medium max-w-[16rem] truncate" title={v.userAgent}>
+                              {v.userAgent.includes('Mobile') || v.userAgent.includes('iPhone') || v.userAgent.includes('Android')
+                                ? '📱 Mobile Browser'
+                                : '💻 Desktop Browser'} — <span className="text-[10px] text-slate-450">{v.userAgent.slice(0, 45)}...</span>
+                            </td>
+                            <td className="p-5 text-center">
+                              <span className="font-extrabold text-forest bg-forest-light/10 px-2 py-0.5 rounded">
+                                {v.pageViews}
+                              </span>
+                            </td>
+                            <td className="p-5">
+                              <div className="flex flex-wrap gap-1 max-w-[18rem]">
+                                {v.pagesVisited?.slice(0, 3).map((p, idx) => (
+                                  <span key={idx} className="bg-slate-50 border border-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px] font-semibold truncate max-w-[7rem]" title={p.path}>
+                                    {p.path}
+                                  </span>
+                                ))}
+                                {v.pagesVisited?.length > 3 && (
+                                  <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-[10px] font-bold">
+                                    +{v.pagesVisited.length - 3}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="p-5 text-right font-bold text-slate-500 whitespace-nowrap">
+                              {new Date(v.lastVisitedAt).toLocaleString()}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Mobile View */}
+                  <div className="md:hidden divide-y divide-slate-100">
+                    {filteredVisitors.map((v) => (
+                      <div key={v._id} className="p-5 space-y-2 hover:bg-slate-50/40 transition-smooth">
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold text-slate-900 font-mono text-xs">{v.ip}</span>
+                          <span className="font-extrabold text-forest bg-forest-light/10 px-2.5 py-0.5 rounded text-[10px]">
+                            {v.pageViews} views
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-slate-500 space-y-0.5 font-sans">
+                          <div>
+                            <span className="font-bold">Last Visit:</span> {new Date(v.lastVisitedAt).toLocaleString()}
+                          </div>
+                          <div className="truncate">
+                            <span className="font-bold">Referrer:</span> {v.referrer || 'Direct / Bookmark'}
+                          </div>
+                          <div className="flex flex-wrap gap-1 pt-1">
+                            {v.pagesVisited?.slice(0, 4).map((p, idx) => (
+                              <span key={idx} className="bg-slate-50 border border-slate-200 text-slate-600 px-1.5 py-0.5 rounded text-[9px] font-semibold">
+                                {p.path}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
         );
       })()}
     </div>

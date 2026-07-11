@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Category = require('../models/Category');
 const auth = require('../middleware/auth');
-const { upload, isCloudinaryConfigured } = require('../config/cloudinary');
+const { upload, isCloudinaryConfigured, processAndUploadImage } = require('../config/cloudinary');
 
 // @route   GET /api/categories
 // @desc    Get all categories
@@ -40,12 +40,7 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
 
     let imageUrl = '';
     if (req.file) {
-      if (isCloudinaryConfigured) {
-        imageUrl = req.file.path; // Cloudinary URL
-      } else {
-        // Local path URL (served statically via backend express server)
-        imageUrl = `/uploads/${req.file.filename}`;
-      }
+      imageUrl = await processAndUploadImage(req.file);
     }
 
     const newCategory = new Category({
@@ -97,11 +92,7 @@ router.put('/:id', auth, upload.single('image'), async (req, res) => {
     if (req.body.workType) category.workType = req.body.workType;
 
     if (req.file) {
-      if (isCloudinaryConfigured) {
-        category.image = req.file.path;
-      } else {
-        category.image = `/uploads/${req.file.filename}`;
-      }
+      category.image = await processAndUploadImage(req.file);
     } else if (req.body.image) {
       category.image = req.body.image;
     }

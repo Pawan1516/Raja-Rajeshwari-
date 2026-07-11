@@ -227,7 +227,7 @@ const mockTeam = [
     role: 'Founder & Head Carpentry Craftsman',
     role_te: 'స్థాపకుడు & ప్రధాన వడ్రంగి హస్తకళాకారుడు',
     exp: '25+ Years',
-    image: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=400&q=80'
+    image: '/uploads/owner.jpg'
   }
 ];
 const mockInquiries = [];
@@ -326,10 +326,98 @@ api.interceptors.response.use(
           return {
             data: {
               token: 'mock_jwt_token_for_offline_demo',
-              admin: { id: 'mock_admin_id', username: 'Rajamoulichary' }
+              admin: { id: 'mock_admin_id', username: 'Rajamoulichary', image: '/uploads/admin-avatar.png' }
             }
           };
         }
+      } else if (method === 'post' && url.includes('/admin/refresh')) {
+        return {
+          data: {
+            token: 'mock_jwt_token_for_offline_demo',
+            admin: { id: 'mock_admin_id', username: 'Rajamoulichary', image: '/uploads/admin-avatar.png' }
+          }
+        };
+      } else if (method === 'post' && url.includes('/visitors/log')) {
+        const data = JSON.parse(config.data);
+        let visitors = JSON.parse(sessionStorage.getItem('mock_visitors') || '[]');
+        const now = new Date();
+        let found = visitors.find(v => v.ip === '127.0.0.1' && (now - new Date(v.lastVisitedAt) < 24 * 60 * 60 * 1000));
+        
+        if (found) {
+          found.pageViews += 1;
+          found.pagesVisited.push({ path: data.path, timestamp: now.toISOString() });
+          found.lastVisitedAt = now.toISOString();
+        } else {
+          visitors.push({
+            _id: 'visitor_' + Math.random().toString(36).substr(2, 9),
+            ip: '127.0.0.1',
+            userAgent: navigator.userAgent,
+            pagesVisited: [{ path: data.path, timestamp: now.toISOString() }],
+            pageViews: 1,
+            referrer: data.referrer || 'Direct Link',
+            lastVisitedAt: now.toISOString(),
+            createdAt: now.toISOString()
+          });
+        }
+        sessionStorage.setItem('mock_visitors', JSON.stringify(visitors));
+        return { data: { success: true } };
+      } else if (method === 'get' && url.includes('/visitors')) {
+        let visitors = JSON.parse(sessionStorage.getItem('mock_visitors') || '[]');
+        if (visitors.length === 0) {
+          visitors = [
+            {
+              _id: 'vis_1',
+              ip: '192.168.1.45',
+              userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+              pagesVisited: [
+                { path: '/', timestamp: new Date(Date.now() - 3600000).toISOString() },
+                { path: '/categories', timestamp: new Date(Date.now() - 3000000).toISOString() },
+                { path: '/designs', timestamp: new Date(Date.now() - 2400000).toISOString() }
+              ],
+              pageViews: 3,
+              referrer: 'https://google.com',
+              lastVisitedAt: new Date(Date.now() - 2400000).toISOString(),
+              createdAt: new Date(Date.now() - 3600000).toISOString()
+            },
+            {
+              _id: 'vis_2',
+              ip: '182.72.101.12',
+              userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1',
+              pagesVisited: [
+                { path: '/', timestamp: new Date(Date.now() - 10000000).toISOString() },
+                { path: '/contact', timestamp: new Date(Date.now() - 9500000).toISOString() }
+              ],
+              pageViews: 2,
+              referrer: 'https://instagram.com',
+              lastVisitedAt: new Date(Date.now() - 9500000).toISOString(),
+              createdAt: new Date(Date.now() - 10000000).toISOString()
+            }
+          ];
+          sessionStorage.setItem('mock_visitors', JSON.stringify(visitors));
+        }
+
+        let totalPageViews = 0;
+        const pageCounts = {};
+        visitors.forEach(v => {
+          totalPageViews += v.pageViews;
+          v.pagesVisited.forEach(p => {
+            pageCounts[p.path] = (pageCounts[p.path] || 0) + 1;
+          });
+        });
+
+        const popularPages = Object.entries(pageCounts)
+          .map(([path, count]) => ({ path, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 5);
+
+        const stats = {
+          totalPageViews,
+          uniqueVisitors: visitors.length,
+          averageViewsPerSession: visitors.length > 0 ? parseFloat((totalPageViews / visitors.length).toFixed(1)) : 0,
+          popularPages
+        };
+
+        return { data: { visitors, stats } };
       } else if (method === 'post' && url.includes('/designs/bulk')) {
         const categoryOverride = config.data.get('categoryOverride');
         const subcategoryOverride = config.data.get('subcategoryOverride') || '';
@@ -518,6 +606,14 @@ export const authService = {
     }
     return response.data;
   },
+  refreshToken: async () => {
+    const response = await api.post('/admin/refresh');
+    if (response.data.token) {
+      localStorage.setItem('rliw_admin_token', response.data.token);
+      localStorage.setItem('rliw_admin_user', JSON.stringify(response.data.admin));
+    }
+    return response.data;
+  },
   logout: () => {
     localStorage.removeItem('rliw_admin_token');
     localStorage.removeItem('rliw_admin_user');
@@ -664,6 +760,17 @@ export const inquiryService = {
     const response = await api.delete(`/inquiries/${id}`);
     return response.data;
   },
+};
+
+export const visitorService = {
+  logVisit: async (path, referrer) => {
+    const response = await api.post('/visitors/log', { path, referrer });
+    return response.data;
+  },
+  getVisitors: async () => {
+    const response = await api.get('/visitors');
+    return response.data;
+  }
 };
 
 export default api;
