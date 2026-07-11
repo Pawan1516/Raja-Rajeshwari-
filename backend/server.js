@@ -25,7 +25,8 @@ const startServer = async () => {
   const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:5173',
-    'https://raja-rajeshwari-239u.vercel.app'
+    'https://raja-rajeshwari-239u.vercel.app',
+    'https://raja-rajeshwari.vercel.app'
   ];
 
   const corsOptions = {
