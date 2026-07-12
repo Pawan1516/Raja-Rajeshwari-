@@ -83,7 +83,7 @@ export default function Home() {
       id: 'lighting',
       name_en: 'Lighting Solutions',
       name_te: 'లైటింగ్ సొల్యూషన్స్',
-      image: 'https://images.unsplash.com/photo-1565814636199-ae8133055c1c?auto=format&fit=crop&w=600&q=80',
+      image: 'https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?auto=format&fit=crop&w=600&q=80',
       link: '/lighting-solutions'
     }
   ];

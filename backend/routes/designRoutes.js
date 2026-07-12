@@ -108,7 +108,7 @@ router.get('/:id', async (req, res) => {
 // @route   POST /api/designs/bulk
 // @desc    Bulk create designs (Admin Only)
 // @access  Private (Admin Only)
-router.post('/bulk', auth, upload.array('images', 20), async (req, res) => {
+router.post('/bulk', auth, upload.array('images', 100), async (req, res) => {
   const { categoryOverride, subcategoryOverride, titleOverride } = req.body;
 
   if (!req.files || req.files.length === 0) {
@@ -138,9 +138,6 @@ router.post('/bulk', auth, upload.array('images', 20), async (req, res) => {
 
       let finalCategoryName = safeAnalysis.category;
       let finalSubcategory = subcategoryOverride || safeAnalysis.subcategory;
-      let finalTitleEn = titleOverride
-        ? `${titleOverride} - ${finalSubcategory}`
-        : safeAnalysis.title_en;
       let finalWorkType = safeAnalysis.workType;
 
       // If manual category override is specified, get it from DB
@@ -151,7 +148,27 @@ router.post('/bulk', auth, upload.array('images', 20), async (req, res) => {
           categoryId = catDoc._id;
           finalCategoryName = catDoc.name_en;
           finalWorkType = catDoc.workType;
+          
+          if (!subcategoryOverride) {
+            finalSubcategory = finalCategoryName
+              .replace(/\s+(Interiors?|Designs?|Works?|Installations?|Systems?|Wiring|Setups?|Automations?|Services?|Concepts?)$/i, '')
+              .trim();
+          }
         }
+      }
+
+      let finalTitleEn;
+      if (titleOverride) {
+        finalTitleEn = `${titleOverride} - ${finalSubcategory}`;
+      } else if (categoryOverride && categoryOverride !== 'undefined') {
+        const styles = ["Luxury", "Modern", "Premium", "Elegant", "Contemporary", "Minimalist", "Smart"];
+        const style = styles[Math.floor(Math.random() * styles.length)];
+        let suffix = "Design";
+        if (finalWorkType === 'electrical') suffix = "Setup";
+        if (finalWorkType === 'lighting') suffix = "Layout";
+        finalTitleEn = `${style} ${finalSubcategory} ${suffix}`;
+      } else {
+        finalTitleEn = safeAnalysis.title_en;
       }
 
       // If no categoryOverride, look up Category in the database matching detected name_en

@@ -142,6 +142,7 @@ export default function AdminDashboard() {
     setActionLoading(true);
     setFeedback({ type: '', message: '' });
     setBulkUploadProgress(5);
+    setBulkProcessedResults([]);
 
     const initialQueue = bulkFiles.map(f => ({
       filename: f.name,
@@ -149,39 +150,81 @@ export default function AdminDashboard() {
     }));
     setBulkQueueStatus(initialQueue);
 
-    const formData = new FormData();
-    formData.append('categoryOverride', bulkCategoryOverride);
-    formData.append('subcategoryOverride', bulkSubcategoryOverride);
-    formData.append('titleOverride', bulkTitleOverride);
-    
-    bulkFiles.forEach(file => {
-      formData.append('images', file);
-    });
+    const BATCH_SIZE = 4; // safe batch size to avoid timeout or OOM on server
+    const totalFiles = bulkFiles.length;
+    let allResults = [];
+    let failedCount = 0;
 
-    try {
-      setBulkQueueStatus(prev => prev.map(item => ({ ...item, status: 'uploading' })));
-      setBulkUploadProgress(25);
+    for (let i = 0; i < totalFiles; i += BATCH_SIZE) {
+      const batchFiles = bulkFiles.slice(i, i + BATCH_SIZE);
+      const batchFilenames = batchFiles.map(f => f.name);
 
-      const response = await designService.bulkCreate(formData, (progressEvent) => {
-        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-        setBulkUploadProgress(Math.min(85, Math.max(25, Math.round(percentCompleted * 0.85))));
+      // Update queue status to uploading for current batch
+      setBulkQueueStatus(prev => 
+        prev.map(item => 
+          batchFilenames.includes(item.filename) ? { ...item, status: 'uploading' } : item
+        )
+      );
+
+      const formData = new FormData();
+      formData.append('categoryOverride', bulkCategoryOverride);
+      formData.append('subcategoryOverride', bulkSubcategoryOverride);
+      formData.append('titleOverride', bulkTitleOverride);
+      
+      batchFiles.forEach(file => {
+        formData.append('images', file);
       });
 
-      setBulkQueueStatus(prev => prev.map(item => ({ ...item, status: 'completed' })));
-      setBulkUploadProgress(100);
-      setBulkProcessedResults(response);
+      try {
+        const response = await designService.bulkCreate(formData);
+        
+        allResults = [...allResults, ...response];
+        setBulkProcessedResults(allResults);
+
+        // Update queue status to completed for current batch
+        setBulkQueueStatus(prev => 
+          prev.map(item => 
+            batchFilenames.includes(item.filename) ? { ...item, status: 'completed' } : item
+          )
+        );
+      } catch (err) {
+        console.error(`Batch starting at index ${i} failed:`, err);
+        failedCount += batchFiles.length;
+        
+        const errorMsg = err.response?.data?.message || err.message || 'Failed';
+        // Update queue status to error for current batch
+        setBulkQueueStatus(prev => 
+          prev.map(item => 
+            batchFilenames.includes(item.filename) ? { ...item, status: 'error', error: errorMsg } : item
+          )
+        );
+      }
+
+      // Update progress
+      const processedCount = Math.min(totalFiles, i + batchFiles.length);
+      const percent = Math.round((processedCount * 100) / totalFiles);
+      setBulkUploadProgress(percent);
+    }
+
+    if (failedCount === 0) {
       setFeedback({ 
         type: 'success', 
-        message: `Successfully uploaded and auto-processed ${response.length} design cards!` 
+        message: `Successfully uploaded and auto-processed ${allResults.length} design cards!` 
       });
-      loadData();
-    } catch (err) {
-      console.error(err);
-      setBulkQueueStatus(prev => prev.map(item => ({ ...item, status: 'error', error: err.message || 'Failed' })));
-      setFeedback({ type: 'error', message: err.response?.data?.message || err.message || 'Bulk upload failed.' });
-    } finally {
-      setActionLoading(false);
+    } else if (allResults.length > 0) {
+      setFeedback({ 
+        type: 'warning', 
+        message: `Successfully processed ${allResults.length} design cards. ${failedCount} images failed.` 
+      });
+    } else {
+      setFeedback({ 
+        type: 'error', 
+        message: 'Bulk upload failed. Please check file formats or server status.' 
+      });
     }
+
+    loadData();
+    setActionLoading(false);
   };
 
   // Category Form States
@@ -578,6 +621,8 @@ export default function AdminDashboard() {
             <Sparkles className="w-4 h-4" />
             <span>AI Bulk Upload</span>
           </button>
+
+
           
           <button
             onClick={() => {
@@ -981,11 +1026,36 @@ export default function AdminDashboard() {
                         className="w-full bg-white text-slate-850 text-xs px-3.5 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-amber-500 transition-smooth"
                       >
                         <option value="">-- Let AI Detect Category --</option>
-                        {categories.map((cat) => (
-                          <option key={cat._id} value={cat._id}>
-                            {cat.name_en} ({cat.workType})
-                          </option>
-                        ))}
+                        <optgroup label="Interior">
+                          {categories
+                            .filter((cat) => cat.workType === 'interior')
+                            .sort((a, b) => a.name_en.localeCompare(b.name_en))
+                            .map((cat) => (
+                              <option key={cat._id} value={cat._id}>
+                                {cat.name_en} ({cat.workType})
+                              </option>
+                            ))}
+                        </optgroup>
+                        <optgroup label="Electrical">
+                          {categories
+                            .filter((cat) => cat.workType === 'electrical')
+                            .sort((a, b) => a.name_en.localeCompare(b.name_en))
+                            .map((cat) => (
+                              <option key={cat._id} value={cat._id}>
+                                {cat.name_en} ({cat.workType})
+                              </option>
+                            ))}
+                        </optgroup>
+                        <optgroup label="Lighting">
+                          {categories
+                            .filter((cat) => cat.workType === 'lighting')
+                            .sort((a, b) => a.name_en.localeCompare(b.name_en))
+                            .map((cat) => (
+                              <option key={cat._id} value={cat._id}>
+                                {cat.name_en} ({cat.workType})
+                              </option>
+                            ))}
+                        </optgroup>
                       </select>
                     </div>
 
@@ -1285,6 +1355,7 @@ export default function AdminDashboard() {
                       <option value="">-- Select Category --</option>
                       {categories
                         .filter(cat => cat.workType === designWorkType)
+                        .sort((a, b) => a.name_en.localeCompare(b.name_en))
                         .map(cat => (
                           <option key={cat._id} value={cat._id}>{getLocalizedName(cat)}</option>
                         ))

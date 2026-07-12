@@ -31,7 +31,7 @@ const categoriesData = [
 
   // 3. Lighting Solutions
   { name_en: "Decorative Lighting", name_te: "అలంకార లైటింగ్", image: "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?auto=format&fit=crop&w=800&q=80", workType: 'lighting' },
-  { name_en: "LED Ceiling Lighting", name_te: "ఎల్‌ఈడీ సీలింగ్ లైటింగ్", image: "https://images.unsplash.com/photo-1565814636199-ae8133055c1c?auto=format&fit=crop&w=800&q=80", workType: 'lighting' },
+  { name_en: "LED Ceiling Lighting", name_te: "ఎల్‌ఈడీ సీలింగ్ లైటింగ్", image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=800&q=80", workType: 'lighting' },
   { name_en: "Chandeliers", name_te: "ఝూమర్లు (చాండెలియర్స్)", image: "https://images.unsplash.com/photo-1520699049698-acd2fccb8cc8?auto=format&fit=crop&w=800&q=80", workType: 'lighting' },
   { name_en: "Pendant Lighting", name_te: "పెండెంట్ లైటింగ్", image: "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?auto=format&fit=crop&w=800&q=80", workType: 'lighting' },
   { name_en: "Wall Lighting", name_te: "గోడ లైటింగ్", image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=800&q=80", workType: 'lighting' },

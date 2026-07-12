@@ -40,10 +40,11 @@ const fileFilter = (req, file, cb) => {
 };
 
 // Use memoryStorage to process files via sharp before saving
+const uploadLimit = (parseInt(process.env.FILE_UPLOAD_LIMIT_MB, 10) || 20) * 1024 * 1024;
 const upload = multer({
   storage: multer.memoryStorage(),
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB max per file upload limit
+  limits: { fileSize: uploadLimit },
 });
 
 /**
